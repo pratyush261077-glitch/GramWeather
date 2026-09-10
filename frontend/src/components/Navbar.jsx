@@ -78,17 +78,17 @@ export default function Navbar({ activeScreen, setActiveScreen }) {
       <div className="navbar-bottom-row">
         <nav className="nav-tabs">
           <button
-            className={`nav-tab-btn ${activeScreen === 'monsoon' ? 'active' : ''}`}
-            onClick={() => setActiveScreen('monsoon')}
-          >
-            <CloudRain size={14} color={activeScreen === 'monsoon' ? '#06241b' : '#34d399'} /> {t('navMonsoon') || 'Monsoon'}
-          </button>
-
-          <button
             className={`nav-tab-btn ${activeScreen === 'dashboard' ? 'active' : ''}`}
             onClick={() => setActiveScreen('dashboard')}
           >
             <Compass size={14} /> {t('navDashboard')}
+          </button>
+
+          <button
+            className={`nav-tab-btn ${activeScreen === 'monsoon' ? 'active' : ''}`}
+            onClick={() => setActiveScreen('monsoon')}
+          >
+            <CloudRain size={14} color={activeScreen === 'monsoon' ? '#06241b' : '#34d399'} /> {t('navMonsoon') || 'Monsoon'}
           </button>
 
           <button

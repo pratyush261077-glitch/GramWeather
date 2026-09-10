@@ -14,7 +14,7 @@ import './styles/global.css';
 import './styles/dashboard.css';
 
 function MainAppShell() {
-  const [activeScreen, setActiveScreen] = useState('monsoon');
+  const [activeScreen, setActiveScreen] = useState('dashboard');
   const [inspectObservation, setInspectObservation] = useState(null);
   const { isReportModalOpen, setIsReportModalOpen } = useWeather();
 
@@ -30,10 +30,10 @@ function MainAppShell() {
 
       {/* Screen Views */}
       <main style={{ flex: 1 }}>
-        {activeScreen === 'monsoon' && <Monsoon onNavigate={setActiveScreen} />}
         {activeScreen === 'dashboard' && (
           <Dashboard onInspectObservation={handleInspectObservation} />
         )}
+        {activeScreen === 'monsoon' && <Monsoon onNavigate={setActiveScreen} />}
         {activeScreen === 'verification' && (
           <Verification inspectTarget={inspectObservation} />
         )}
