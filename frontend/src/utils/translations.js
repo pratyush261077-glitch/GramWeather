@@ -8,6 +8,7 @@ export const TRANSLATIONS = {
     // Header & Nav
     brandTitle: "GramWeather AI",
     brandSubtitle: "Hyperlocal Village Intelligence",
+    navMonsoon: "Monsoon",
     navDashboard: "Dashboard",
     navVerification: "Verification Lab",
     navAdvisory: "AI Advisory",
@@ -225,6 +226,7 @@ export const TRANSLATIONS = {
     // Header & Nav
     brandTitle: "ग्रामवेदर एआई",
     brandSubtitle: "गाँव स्तरीय मौसम बुद्धिमत्ता",
+    navMonsoon: "मानसून",
     navDashboard: "डैशबोर्ड",
     navVerification: "सत्यापन लैब",
     navAdvisory: "कृषि सलाह",
@@ -442,6 +444,7 @@ export const TRANSLATIONS = {
     // Header & Nav
     brandTitle: "ਗ੍ਰਾਮਵੈਦਰ ਏ.ਆਈ",
     brandSubtitle: "ਪਿੰਡ ਪੱਧਰੀ ਮੌਸਮ ਬੁੱਧੀਮਤਾ",
+    navMonsoon: "ਮਾਨਸੂਨ",
     navDashboard: "ਡੈਸ਼ਬੋਰਡ",
     navVerification: "ਤਸਦੀਕ ਲੈਬ",
     navAdvisory: "ਖੇਤੀ ਸਲਾਹ",

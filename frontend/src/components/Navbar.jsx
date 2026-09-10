@@ -1,6 +1,6 @@
 import React from 'react';
 import { useWeather } from '../context/WeatherContext';
-import { MapPin, Sprout, ShieldCheck, Compass, Send, RefreshCw, AlertTriangle } from './icons';
+import { MapPin, Sprout, ShieldCheck, Compass, Send, RefreshCw, AlertTriangle, CloudRain } from './icons';
 import LanguageSelector from './LanguageSelector';
 import LocationChamberSelector from './LocationChamberSelector';
 
@@ -32,6 +32,13 @@ export default function Navbar({ activeScreen, setActiveScreen }) {
 
       {/* Screen Navigation Tabs */}
       <nav className="nav-tabs">
+        <button
+          className={`nav-tab-btn ${activeScreen === 'monsoon' ? 'active' : ''}`}
+          onClick={() => setActiveScreen('monsoon')}
+        >
+          <CloudRain size={14} color="#34d399" /> {t('navMonsoon') || 'Monsoon'}
+        </button>
+
         <button
           className={`nav-tab-btn ${activeScreen === 'dashboard' ? 'active' : ''}`}
           onClick={() => setActiveScreen('dashboard')}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { WeatherProvider, useWeather } from './context/WeatherContext';
 import Navbar from './components/Navbar';
+import Monsoon from './screens/Monsoon';
 import Dashboard from './screens/Dashboard';
 import Verification from './screens/Verification';
 import Advisory from './screens/Advisory';
@@ -13,7 +14,7 @@ import './styles/global.css';
 import './styles/dashboard.css';
 
 function MainAppShell() {
-  const [activeScreen, setActiveScreen] = useState('dashboard');
+  const [activeScreen, setActiveScreen] = useState('monsoon');
   const [inspectObservation, setInspectObservation] = useState(null);
   const { isReportModalOpen, setIsReportModalOpen } = useWeather();
 
@@ -29,6 +30,7 @@ function MainAppShell() {
 
       {/* Screen Views */}
       <main style={{ flex: 1 }}>
+        {activeScreen === 'monsoon' && <Monsoon />}
         {activeScreen === 'dashboard' && (
           <Dashboard onInspectObservation={handleInspectObservation} />
         )}

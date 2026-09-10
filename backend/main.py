@@ -32,6 +32,13 @@ from backend.data.mock_data import (
     get_simulated_sensors_for_village,
     get_simulated_community_reports
 )
+from datetime import date, timedelta
+from backend.services.monsoon_service import (
+    compute_outlook as compute_monsoon_outlook,
+    backtest_onset as backtest_monsoon_onset,
+    fetch_daily_rain,
+    fetch_forecast_rain
+)
 
 app = FastAPI(
     title="GramWeather AI Backend",
@@ -314,6 +321,55 @@ async def get_history(village_id: str):
         "recent_trend": trend,
         "chirps_baseline": chirps
     }
+
+def _resolve_village(village_id: str) -> Dict[str, Any]:
+    """Resolve village dictionary by ID, name, or block, falling back to Khanna."""
+    v = get_village_by_id(village_id)
+    if v:
+        return v
+    for item in load_villages():
+        if item.get("name", "").lower() == village_id.lower() or item.get("block", "").lower() == village_id.lower():
+            return item
+    # Fallback to Khanna default: lat 30.70, lon 76.22
+    return {
+        "id": village_id.lower(),
+        "name": village_id.title(),
+        "block": village_id.title(),
+        "district": "Ludhiana",
+        "state": "Punjab",
+        "latitude": 30.70,
+        "longitude": 76.22,
+    }
+
+@app.get("/monsoon/{village}")
+@app.get("/api/monsoon/{village}")
+async def get_monsoon(village: str):
+    """
+    Monsoon Onset & Break Prediction Outlook for a village or block.
+    Adapts IMD / Pai et al. (2014) criteria using Open-Meteo ERA5 reanalysis and NWP forecast.
+    """
+    v = _resolve_village(village)
+    lat = float(v.get("latitude", 30.70))
+    lon = float(v.get("longitude", 76.22))
+    today = date.today()
+    archive_end = (today - timedelta(days=1)).isoformat()
+    start_date = f"{today.year}-06-01"
+    daily_history = await fetch_daily_rain(lat, lon, start_date, archive_end)
+    forecast_7d, forecast_sum = await fetch_forecast_rain(lat, lon)
+    return await compute_monsoon_outlook(v, daily_history, forecast_7d, forecast_sum, today)
+
+@app.get("/monsoon/{village}/backtest")
+@app.get("/api/monsoon/{village}/backtest")
+async def get_monsoon_backtest(village: str):
+    """
+    Backtest onset detection for 2023, 2024, 2025, 2026.
+    Compares detected onset dates with climatological normal.
+    """
+    v = _resolve_village(village)
+    lat = float(v.get("latitude", 30.70))
+    lon = float(v.get("longitude", 76.22))
+    block = v.get("block", v.get("district", "Khanna"))
+    return await backtest_monsoon_onset(lat, lon, block, [2023, 2024, 2025, 2026])
 
 if __name__ == "__main__":
     import uvicorn
