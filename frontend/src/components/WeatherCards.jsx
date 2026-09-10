@@ -7,8 +7,11 @@ export default function WeatherCards({ currentWeather }) {
   const { t, getConditionLabel } = useWeather();
   if (!currentWeather) {
     return (
-      <div className="glass-panel weather-hero-card">
-        <p style={{ color: 'var(--text-secondary)' }}>{t('connecting')}</p>
+      <div className="glass-panel weather-hero-card" style={{ padding: '36px 24px', textAlign: 'center' }}>
+        <div className="pulse-dot live" style={{ width: '14px', height: '14px', margin: '0 auto 12px' }} />
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0, fontWeight: 600 }}>
+          {t('syncingTelemetry') || 'Syncing atmospheric telemetry...'}
+        </p>
       </div>
     );
   }

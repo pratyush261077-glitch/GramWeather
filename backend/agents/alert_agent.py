@@ -150,24 +150,40 @@ class AlertAgent:
         return alerts
 
     @classmethod
-    def inject_demo_alert(cls, village_id: str) -> Dict[str, Any]:
-        """Injects a synthetic Heavy Rain event for judges to preview live alert triggers."""
+    def inject_demo_alert(cls, village_id: str, alert_type: str = "HEAVY RAIN") -> Dict[str, Any]:
+        """Injects a synthetic event (HEAVY RAIN or BREAK RISK) for judges to preview live alert triggers."""
         v_key = village_id.lower()
         now_iso = datetime.utcnow().isoformat()
-        demo_alert = {
-            "id": f"ALT_DEMO_RAIN_{uuid.uuid4().hex[:6]}",
-            "village_id": village_id,
-            "type": "HEAVY RAIN",
-            "severity": "CRITICAL",
-            "title": "Severe Heavy Rain Warning (Demo Injection)",
-            "message": "Forecast rainfall is 72.8 mm in next 24h, exceeding the IMD heavy rain threshold (64.5 mm).",
-            "action_required": "Avoid irrigation, protect harvested produce.",
-            "parameter_trigger": "Forecast Rain: 72.8 mm / 24h (≥ 64.5 mm)",
-            "source_label": "Open-Meteo NWP Forecast (Demo Synthetic Event)",
-            "timestamp": now_iso,
-            "is_injected": True,
-            "is_active": True
-        }
+        if alert_type.upper() == "BREAK RISK":
+            demo_alert = {
+                "id": f"ALT_DEMO_BREAK_{uuid.uuid4().hex[:6]}",
+                "village_id": village_id,
+                "type": "BREAK RISK",
+                "severity": "WARNING",
+                "title": "Monsoon Break Spell Warning (Demo Injection)",
+                "message": "NWP multi-day ensemble projects extended dry spell (<10 mm rain over next 7 days).",
+                "action_required": "Monsoon break likely, plan irrigation backup.",
+                "parameter_trigger": "Monsoon Break Risk: HIGH (<10 mm / 7d)",
+                "source_label": "GramWeather Monsoon Break Model (Pai et al. 2014)",
+                "timestamp": now_iso,
+                "is_injected": True,
+                "is_active": True
+            }
+        else:
+            demo_alert = {
+                "id": f"ALT_DEMO_RAIN_{uuid.uuid4().hex[:6]}",
+                "village_id": village_id,
+                "type": "HEAVY RAIN",
+                "severity": "CRITICAL",
+                "title": "Severe Heavy Rain Warning (Demo Injection)",
+                "message": "Forecast rainfall is 72.8 mm in next 24h, exceeding the IMD heavy rain threshold (64.5 mm).",
+                "action_required": "Avoid irrigation, protect harvested produce.",
+                "parameter_trigger": "Forecast Rain: 72.8 mm / 24h (≥ 64.5 mm)",
+                "source_label": "Open-Meteo NWP Forecast (Demo Synthetic Event)",
+                "timestamp": now_iso,
+                "is_injected": True,
+                "is_active": True
+            }
         if v_key not in _INJECTED_ALERTS:
             _INJECTED_ALERTS[v_key] = []
         _INJECTED_ALERTS[v_key] = [demo_alert]

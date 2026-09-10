@@ -30,7 +30,7 @@ function MainAppShell() {
 
       {/* Screen Views */}
       <main style={{ flex: 1 }}>
-        {activeScreen === 'monsoon' && <Monsoon />}
+        {activeScreen === 'monsoon' && <Monsoon onNavigate={setActiveScreen} />}
         {activeScreen === 'dashboard' && (
           <Dashboard onInspectObservation={handleInspectObservation} />
         )}

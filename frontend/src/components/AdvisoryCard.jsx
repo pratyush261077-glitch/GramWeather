@@ -10,8 +10,11 @@ export default function AdvisoryCard({ advisory, selectedCrop, onSelectCrop, ava
 
   if (!advisory) {
     return (
-      <div className="glass-panel advisory-card">
-        <p style={{ color: 'var(--text-secondary)' }}>{t('connecting')}</p>
+      <div className="glass-panel advisory-card" style={{ padding: '28px', textAlign: 'center' }}>
+        <div className="pulse-dot live" style={{ width: '12px', height: '12px', margin: '0 auto 12px' }} />
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: 0, fontWeight: 600 }}>
+          {t('generatingAdvisory') || 'Generating ICAR decision advisory...'}
+        </p>
       </div>
     );
   }

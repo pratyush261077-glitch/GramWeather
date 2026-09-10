@@ -8,8 +8,8 @@ export async function fetchFarmerAlerts(villageId, lang = 'en') {
   return request(`/alerts/${villageId}?lang=${lang}`);
 }
 
-export async function injectDemoAlert(villageId) {
-  return request(`/alerts/${villageId}/inject`, { method: 'POST' });
+export async function injectDemoAlert(villageId, alertType = 'HEAVY RAIN') {
+  return request(`/alerts/${villageId}/inject?alert_type=${encodeURIComponent(alertType)}`, { method: 'POST' });
 }
 
 export async function clearDemoAlerts(villageId) {

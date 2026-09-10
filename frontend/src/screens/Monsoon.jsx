@@ -4,13 +4,17 @@ import { fetchMonsoonOutlook, fetchMonsoonBacktest } from '../services/monsoonAP
 import { CloudRain, Droplets, Sprout, ShieldCheck, AlertTriangle, RefreshCw, Info, MapPin, ChevronDown, ChevronUp, Copy, Check } from '../components/icons';
 import TransparencyBadge from '../components/TransparencyBadge';
 
-export default function Monsoon() {
+export default function Monsoon({ onNavigate }) {
   const {
     selectedVillage,
     setIsLocationModalOpen,
     t,
     getVillageLabel,
     getCropLabel,
+    getStatusLabel,
+    translateText,
+    injectDemoAlert,
+    clearDemoAlerts,
     isLowBandwidthMode,
     simulateNetworkDrop,
     lastCacheTime
@@ -22,11 +26,116 @@ export default function Monsoon() {
   const [loadingBacktest, setLoadingBacktest] = useState(false);
   const [copiedDeck, setCopiedDeck] = useState(false);
   const [isMonsoonCached, setIsMonsoonCached] = useState(false);
+  const [presetMode, setPresetMode] = useState('live'); // 'live' | 'approaching' | 'active' | 'break_risk'
 
   const villageId = selectedVillage?.id || 'khanna';
   const villageName = selectedVillage?.name || 'Khanna';
   const blockName = selectedVillage?.block || selectedVillage?.district || 'Khanna';
   const stateName = selectedVillage?.state || 'Punjab';
+
+  // Predefined states matching user requirements
+  const DEMO_PRESETS = {
+    approaching: {
+      onset_status: 'APPROACHING',
+      phase: 'PRE_MONSOON',
+      onset_window: { start: '2026-06-25', end: '2026-07-05', label: 'Jun 25 – Jul 5' },
+      climatological_onset: { date: '2026-06-28', window_days: 7 },
+      detected_onset: null,
+      break_risk_7d: 'LOW',
+      forecast_7d_rain_mm: 45.0,
+      dry_spell_index_7d_mm: 1.2,
+      confidence_pct: 72,
+      confidence_basis: [
+        'Pre-monsoon trough advancing northwestward (+25)',
+        'Convective precipitation cluster within 150 km radius (+25)',
+        'Multi-model ensemble signals onset within 7-day window (+22)'
+      ],
+      forecast_7d: [
+        { date: 'Day 1', precipitation_sum: 4.5 },
+        { date: 'Day 2', precipitation_sum: 8.2 },
+        { date: 'Day 3', precipitation_sum: 12.0 },
+        { date: 'Day 4', precipitation_sum: 10.5 },
+        { date: 'Day 5', precipitation_sum: 5.8 },
+        { date: 'Day 6', precipitation_sum: 2.5 },
+        { date: 'Day 7', precipitation_sum: 1.5 },
+      ],
+      advisory: {
+        sowing: "Onset approaching with substantial pre-monsoon showers (~45 mm expected). Complete field bunding and procure certified seed for timely sowing.",
+        irrigation: "Reduce or pause irrigation as pre-monsoon wetting begins across the village micro-catchment."
+      }
+    },
+    active: {
+      onset_status: 'DECLARED',
+      phase: 'ACTIVE_MONSOON',
+      onset_window: { start: '2026-06-21', end: '2026-07-02', label: 'Jun 21 – Jul 2' },
+      climatological_onset: { date: '2026-06-28', window_days: 7 },
+      detected_onset: '2026-06-27',
+      break_risk_7d: 'MODERATE',
+      forecast_7d_rain_mm: 22.0,
+      dry_spell_index_7d_mm: 3.5,
+      confidence_pct: 85,
+      confidence_basis: [
+        'Pai et al. threshold met: 5-day rain cumulative > 40 mm (+35)',
+        'Westerlies depth established up to 500 hPa (+30)',
+        'Surface relative humidity sustained above 70% (+20)'
+      ],
+      forecast_7d: [
+        { date: 'Day 1', precipitation_sum: 6.2 },
+        { date: 'Day 2', precipitation_sum: 5.0 },
+        { date: 'Day 3', precipitation_sum: 4.1 },
+        { date: 'Day 4', precipitation_sum: 3.2 },
+        { date: 'Day 5', precipitation_sum: 2.0 },
+        { date: 'Day 6', precipitation_sum: 1.0 },
+        { date: 'Day 7', precipitation_sum: 0.5 },
+      ],
+      advisory: {
+        sowing: "Monsoon declared active. Soil moisture profile optimal. Proceed with standard Kharif sowing according to block schedule.",
+        irrigation: "Maintain regular irrigation intervals as needed; supplement with tube-well during moderate dry intervals."
+      }
+    },
+    break_risk: {
+      onset_status: 'ACTIVE',
+      phase: 'BREAK_SPELL',
+      onset_window: { start: '2026-06-21', end: '2026-07-02', label: 'Jun 21 – Jul 2' },
+      climatological_onset: { date: '2026-06-28', window_days: 7 },
+      detected_onset: '2026-06-27',
+      break_risk_7d: 'HIGH',
+      forecast_7d_rain_mm: 6.0,
+      dry_spell_index_7d_mm: 8.4,
+      confidence_pct: 88,
+      confidence_basis: [
+        'Monsoon trough shifted north toward Himalayan foothills (+35)',
+        '7-day rainfall forecast collapses below 10 mm threshold (+35)',
+        'Mid-tropospheric anticyclone encroaching Northwest India (+18)'
+      ],
+      forecast_7d: [
+        { date: 'Day 1', precipitation_sum: 2.0 },
+        { date: 'Day 2', precipitation_sum: 1.5 },
+        { date: 'Day 3', precipitation_sum: 1.0 },
+        { date: 'Day 4', precipitation_sum: 0.5 },
+        { date: 'Day 5', precipitation_sum: 0.5 },
+        { date: 'Day 6', precipitation_sum: 0.3 },
+        { date: 'Day 7', precipitation_sum: 0.2 },
+      ],
+      advisory: {
+        sowing: "Monsoon active but extended dry break spell (<10 mm rain / 7d) detected. Pause fresh transplantation and preserve field bund moisture.",
+        irrigation: "Monsoon break likely, plan irrigation backup. Activate auxiliary tube-well or community pond storage immediately."
+      }
+    }
+  };
+
+  const handleSelectPreset = async (mode) => {
+    setPresetMode(mode);
+    if (mode === 'break_risk') {
+      if (injectDemoAlert) {
+        await injectDemoAlert('BREAK RISK');
+      }
+    } else {
+      if (presetMode === 'break_risk' && clearDemoAlerts) {
+        await clearDemoAlerts();
+      }
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -117,7 +226,8 @@ export default function Monsoon() {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'DECLARED':
-        return { bg: 'rgba(16, 185, 129, 0.2)', border: '#10b981', color: '#34d399', text: 'DECLARED' };
+      case 'ACTIVE':
+        return { bg: 'rgba(16, 185, 129, 0.2)', border: '#10b981', color: '#34d399', text: status };
       case 'IN_PROGRESS':
         return { bg: 'rgba(56, 189, 248, 0.2)', border: '#38bdf8', color: '#7dd3fc', text: 'IN PROGRESS' };
       case 'APPROACHING':
@@ -175,9 +285,11 @@ export default function Monsoon() {
     return windowObj.label || 'Jun 21 – Jul 5';
   };
 
-  const statusBadge = getStatusBadge(outlook?.onset_status);
-  const riskBadge = getRiskBadge(outlook?.break_risk_7d);
-  const forecast7d = outlook?.forecast_7d || [];
+  // Active outlook: preset payload if selected, otherwise live outlook
+  const activeOutlook = (presetMode !== 'live' && DEMO_PRESETS[presetMode]) ? DEMO_PRESETS[presetMode] : outlook;
+  const statusBadge = getStatusBadge(activeOutlook?.onset_status);
+  const riskBadge = getRiskBadge(activeOutlook?.break_risk_7d);
+  const forecast7d = activeOutlook?.forecast_7d || [];
   const maxRain = Math.max(...forecast7d.map(d => d.precipitation_sum || 0), 10);
 
   return (
@@ -264,8 +376,169 @@ export default function Monsoon() {
             {t('monsoonScreenTitle')}
           </h2>
         </div>
-        <TransparencyBadge source="IMD Isochrone Climatology + Open-Meteo ERA5" isSimulated={false} />
+        <TransparencyBadge source="IMD Isochrone Climatology + Open-Meteo ERA5" isSimulated={presetMode !== 'live'} />
       </div>
+
+      {/* Demo Presets Control Bar (Clearly Labeled DEMO for Jury) */}
+      <div
+        className="glass-panel"
+        style={{
+          padding: '12px 18px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '12px',
+          borderRadius: 'var(--radius-md)',
+          background: 'rgba(15, 32, 28, 0.75)',
+          border: '1px solid rgba(16, 185, 129, 0.25)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <span
+            style={{
+              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+              color: '#000',
+              padding: '3px 8px',
+              borderRadius: '6px',
+              fontSize: '0.72rem',
+              fontWeight: 800,
+              letterSpacing: '0.04em',
+            }}
+          >
+            DEMO
+          </span>
+          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#e2e8f0' }}>
+            {t('monsoonPresetsTitle') || 'Demo Presets (Jury Preview):'}
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => handleSelectPreset('live')}
+            className={`btn-scenario ${presetMode === 'live' ? 'active' : ''}`}
+            style={{
+              padding: '6px 14px',
+              borderRadius: '8px',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              background: presetMode === 'live' ? 'var(--accent-emerald)' : 'rgba(255, 255, 255, 0.05)',
+              color: presetMode === 'live' ? '#06241b' : '#cbd5e1',
+              border: presetMode === 'live' ? '1px solid var(--accent-emerald)' : '1px solid var(--border-subtle)',
+            }}
+          >
+            {t('presetLive') || 'Normal (Live)'}
+          </button>
+
+          <button
+            onClick={() => handleSelectPreset('approaching')}
+            className={`btn-scenario ${presetMode === 'approaching' ? 'active' : ''}`}
+            style={{
+              padding: '6px 14px',
+              borderRadius: '8px',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              background: presetMode === 'approaching' ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' : 'rgba(255, 255, 255, 0.05)',
+              color: presetMode === 'approaching' ? '#000' : '#cbd5e1',
+              border: presetMode === 'approaching' ? '1px solid #f59e0b' : '1px solid var(--border-subtle)',
+            }}
+          >
+            ⚡ {t('presetApproaching') || 'Approaching onset (DEMO)'}
+          </button>
+
+          <button
+            onClick={() => handleSelectPreset('active')}
+            className={`btn-scenario ${presetMode === 'active' ? 'active' : ''}`}
+            style={{
+              padding: '6px 14px',
+              borderRadius: '8px',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              background: presetMode === 'active' ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'rgba(255, 255, 255, 0.05)',
+              color: presetMode === 'active' ? '#000' : '#cbd5e1',
+              border: presetMode === 'active' ? '1px solid #10b981' : '1px solid var(--border-subtle)',
+            }}
+          >
+            🌧️ {t('presetActive') || 'Active monsoon (DEMO)'}
+          </button>
+
+          <button
+            onClick={() => handleSelectPreset('break_risk')}
+            className={`btn-scenario ${presetMode === 'break_risk' ? 'active' : ''}`}
+            style={{
+              padding: '6px 14px',
+              borderRadius: '8px',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              background: presetMode === 'break_risk' ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' : 'rgba(255, 255, 255, 0.05)',
+              color: presetMode === 'break_risk' ? '#fff' : '#cbd5e1',
+              border: presetMode === 'break_risk' ? '1px solid #ef4444' : '1px solid var(--border-subtle)',
+              boxShadow: presetMode === 'break_risk' ? '0 0 12px rgba(239, 68, 68, 0.4)' : 'none',
+            }}
+          >
+            ⚠️ {t('presetBreakRisk') || 'Break risk (DEMO)'}
+          </button>
+        </div>
+      </div>
+
+      {/* Break Risk Triggered Alert Banner */}
+      {presetMode === 'break_risk' && (
+        <div
+          className="animate-fade-in"
+          style={{
+            padding: '14px 18px',
+            borderRadius: 'var(--radius-md)',
+            background: 'rgba(239, 68, 68, 0.15)',
+            border: '1.5px solid rgba(239, 68, 68, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px',
+            boxShadow: '0 4px 16px rgba(239, 68, 68, 0.18)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '1.4rem' }}>⚠️</span>
+            <div>
+              <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#fca5a5' }}>
+                {t('monsoonBreakAlertActive') || 'BREAK RISK ALERT ACTIVE: 7-day rain is 6 mm (High Break Risk). Dispatched to Alerts tab & Dashboard.'}
+              </div>
+              <div style={{ fontSize: '0.76rem', color: '#fecaca', marginTop: '2px' }}>
+                Trigger: 7-day rain collapsed to 6.0 mm (&lt;10 mm threshold). Action: Monsoon break likely, plan irrigation backup.
+              </div>
+            </div>
+          </div>
+
+          {onNavigate && (
+            <button
+              onClick={() => onNavigate('alerts')}
+              style={{
+                background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
+                border: 'none',
+                color: '#fff',
+                padding: '7px 16px',
+                borderRadius: '6px',
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: '0 2px 10px rgba(239, 68, 68, 0.35)',
+                transition: 'all 0.2s',
+              }}
+            >
+              {t('viewInAlerts') || 'View in Alerts Tab →'}
+            </button>
+          )}
+        </div>
+      )}
 
       {/* 4 Core Cards Layout - Adjacent in Single Row */}
       <div className="monsoon-cards-grid">
@@ -287,27 +560,27 @@ export default function Monsoon() {
                 color: statusBadge.color,
                 letterSpacing: '0.04em'
               }}>
-                {statusBadge.text}
+                {getStatusLabel(statusBadge.text)}
               </span>
             </div>
 
             <div style={{ fontSize: '1.85rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: '6px' }}>
-              ~{formatOnsetWindow(outlook?.onset_window)}
+              ~{formatOnsetWindow(activeOutlook?.onset_window)}
             </div>
 
             <div style={{ fontSize: '0.82rem', color: '#94a3b8', lineHeight: 1.4 }}>
-              {t('climatologicalNormal')}: <strong style={{ color: '#fff' }}>{formatClimatologicalDate(outlook?.climatological_onset?.date)}</strong> (±7d, approximate)
+              {t('climatologicalNormal')}: <strong style={{ color: '#fff' }}>{formatClimatologicalDate(activeOutlook?.climatological_onset?.date)}</strong> (±7d, approximate)
             </div>
 
-            {outlook?.detected_onset && (
+            {activeOutlook?.detected_onset && (
               <div style={{ marginTop: '10px', padding: '6px 10px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.3)', fontSize: '0.78rem', color: '#a7f3d0' }}>
-                ✓ Effective onset detected on <strong>{outlook.detected_onset}</strong> (Pai et al. criteria met)
+                ✓ {t('effectiveOnsetDetected')} <strong>{activeOutlook.detected_onset}</strong> {t('criteriaMet')}
               </div>
             )}
           </div>
 
           <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-            Criteria: 5-day cumulative rain ≥ 40 mm with ≥ 2 days ≥ 2.5 mm
+            {t('onsetCriteriaDesc')}
           </div>
         </div>
 
@@ -328,32 +601,34 @@ export default function Monsoon() {
                 color: riskBadge.color,
                 letterSpacing: '0.04em'
               }}>
-                {outlook?.break_risk_7d || 'MODERATE'}
+                {getStatusLabel(activeOutlook?.break_risk_7d || 'MODERATE')}
               </span>
             </div>
 
             <div style={{ fontSize: '0.88rem', color: '#e2e8f0', fontWeight: 700, marginBottom: '10px' }}>
-              {t('breakRiskNext7d')}: <span style={{ color: riskBadge.color }}>{outlook?.break_risk_7d || 'MODERATE'}</span>
+              {t('breakRiskNext7d')}: <span style={{ color: riskBadge.color }}>{getStatusLabel(activeOutlook?.break_risk_7d || 'MODERATE')}</span>
             </div>
 
             <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', lineHeight: 1.2 }}>{t('rainOutlook7d')}</div>
                 <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#38bdf8' }}>
-                  {outlook?.forecast_7d_rain_mm ?? 14} mm
+                  {activeOutlook?.forecast_7d_rain_mm ?? 14} mm
                 </div>
               </div>
               <div style={{ borderLeft: '1px solid var(--border-subtle)', paddingLeft: '10px', flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', lineHeight: 1.2 }}>{t('drySpellIndexLast7d')}</div>
                 <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fbbf24' }}>
-                  {outlook?.dry_spell_index_7d_mm ?? 3} mm
+                  {activeOutlook?.dry_spell_index_7d_mm ?? 3} mm
                 </div>
               </div>
             </div>
 
             {/* Small 7-Day Rain Bar Chart */}
             <div style={{ marginTop: '6px' }}>
-              <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Next 7 Days Forecast (mm/day):</div>
+              <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                {t('next7DaysForecast')}
+              </div>
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '4px', height: '48px', background: 'rgba(0,0,0,0.25)', padding: '4px 6px', borderRadius: '8px' }}>
                 {forecast7d.map((f, idx) => {
                   const val = f.precipitation_sum || 0;
@@ -381,7 +656,7 @@ export default function Monsoon() {
           </div>
 
           <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-            Break Threshold: &lt;10 mm (High), &lt;15 mm (Mod)
+            {t('breakThresholdDesc')}
           </div>
         </div>
 
@@ -393,38 +668,38 @@ export default function Monsoon() {
                 3. {t('cardConfidence')}
               </span>
               <span style={{ fontSize: '0.68rem', color: '#94a3b8', fontStyle: 'italic' }}>
-                Non-calibrated
+                {t('nonCalibrated')}
               </span>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
               <div style={{ fontSize: '2.1rem', fontWeight: 800, color: '#10b981', lineHeight: 1 }}>
-                {outlook?.confidence_pct ?? 55}%
+                {activeOutlook?.confidence_pct ?? 55}%
               </div>
               <div style={{ fontSize: '0.78rem', color: '#6ee7b7', fontWeight: 600 }}>
-                Heuristic Confidence
+                {t('heuristicConfidence')}
               </div>
             </div>
 
             <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginBottom: '6px', fontWeight: 600 }}>
-              Confidence Basis Breakdown:
+              {t('confidenceBreakdownTitle')}
             </div>
             <ul style={{ margin: 0, paddingLeft: '14px', fontSize: '0.76rem', color: 'var(--text-primary)', lineHeight: 1.45 }}>
-              {(outlook?.confidence_basis && outlook.confidence_basis.length > 0) ? (
-                outlook.confidence_basis.map((b, idx) => (
-                  <li key={idx} style={{ marginBottom: '4px' }}>{b}</li>
+              {(activeOutlook?.confidence_basis && activeOutlook.confidence_basis.length > 0) ? (
+                activeOutlook.confidence_basis.map((b, idx) => (
+                  <li key={idx} style={{ marginBottom: '4px' }}>{translateText(b)}</li>
                 ))
               ) : (
                 <>
-                  <li>Detected onset within ±7 days of climatological normal (+20)</li>
-                  <li>NWP forecast agreement with seasonal timing (+20)</li>
+                  <li>{translateText("Detected onset within ±7 days of climatological normal (+20)")}</li>
+                  <li>{translateText("NWP forecast agreement with seasonal timing (+20)")}</li>
                 </>
               )}
             </ul>
           </div>
 
           <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-            *Heuristic score based on NWP delta; not an empirical probability.
+            {t('heuristicDisclaimer')}
           </div>
         </div>
 
@@ -441,7 +716,7 @@ export default function Monsoon() {
                   <Sprout size={15} /> {t('sowingStrategy')}
                 </div>
                 <p style={{ margin: 0, fontSize: '0.78rem', color: '#e2e8f0', lineHeight: 1.4 }}>
-                  {outlook?.advisory?.sowing || "Hold sowing until cumulative rain reaches at least 40 mm over 5 days. Monitor daily rainfall before committing seed."}
+                  {translateText(activeOutlook?.advisory?.sowing) || translateText("Hold sowing until cumulative rain reaches at least 40 mm over 5 days. Monitor daily rainfall before committing seed.")}
                 </p>
               </div>
 
@@ -450,14 +725,14 @@ export default function Monsoon() {
                   <Droplets size={15} /> {t('irrigationSchedule')}
                 </div>
                 <p style={{ margin: 0, fontSize: '0.78rem', color: '#e2e8f0', lineHeight: 1.4 }}>
-                  {outlook?.advisory?.irrigation || "Continue irrigation as needed. Supplement with available water storage during dry spell windows."}
+                  {translateText(activeOutlook?.advisory?.irrigation) || translateText("Continue irrigation as needed. Supplement with available water storage during dry spell windows.")}
                 </p>
               </div>
             </div>
           </div>
 
           <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-            Phase: <strong style={{ color: '#fff' }}>{outlook?.phase || 'ACTIVE_MONSOON'}</strong>
+            {t('phaseLabel')} <strong style={{ color: '#fff' }}>{getStatusLabel(activeOutlook?.phase || 'ACTIVE_MONSOON')}</strong>
           </div>
         </div>
 

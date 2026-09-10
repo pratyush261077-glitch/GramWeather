@@ -73,7 +73,7 @@ export default function Alerts() {
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '3px 10px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', marginBottom: '6px' }}>
             <AlertTriangle size={14} color="#f87171" />
             <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#f87171', letterSpacing: '0.04em' }}>
-              AUTONOMOUS THRESHOLD EVENT ENGINE
+              {t('autonomousEngine') || 'AUTONOMOUS THRESHOLD EVENT ENGINE'}
             </span>
           </div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', margin: 0 }}>
@@ -107,7 +107,7 @@ export default function Alerts() {
             title="Simulate a live Heavy Rain event for judges to preview alert layout"
           >
             <Zap size={14} color="#fff" />
-            {loadingAction ? 'Injecting...' : t('demoInjectAlert')}
+            {loadingAction ? (t('injecting') || 'Injecting...') : t('demoInjectAlert')}
           </button>
 
           {/* Clear Demo Alert Button */}
@@ -154,32 +154,32 @@ export default function Alerts() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ fontSize: '1rem' }}>🌧️</span>
           <div>
-            <div style={{ color: '#fff', fontWeight: 700 }}>HEAVY RAIN</div>
-            <div style={{ color: 'var(--text-secondary)' }}>Rain ≥ 64.5 mm / 24h</div>
+            <div style={{ color: '#fff', fontWeight: 700 }}>{getStatusLabel('HEAVY RAIN') || 'HEAVY RAIN'}</div>
+            <div style={{ color: 'var(--text-secondary)' }}>{t('heavyRainThreshold') || 'Rain ≥ 64.5 mm / 24h'}</div>
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ fontSize: '1rem' }}>💨</span>
           <div>
-            <div style={{ color: '#fff', fontWeight: 700 }}>STRONG WIND</div>
-            <div style={{ color: 'var(--text-secondary)' }}>Wind ≥ 40 km/h</div>
+            <div style={{ color: '#fff', fontWeight: 700 }}>{getStatusLabel('STRONG WIND') || 'STRONG WIND'}</div>
+            <div style={{ color: 'var(--text-secondary)' }}>{t('strongWindThreshold') || 'Wind ≥ 40 km/h'}</div>
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ fontSize: '1rem' }}>☀️</span>
           <div>
-            <div style={{ color: '#fff', fontWeight: 700 }}>HEAT</div>
-            <div style={{ color: 'var(--text-secondary)' }}>Max Temp ≥ 42°C</div>
+            <div style={{ color: '#fff', fontWeight: 700 }}>{getStatusLabel('HEAT') || 'HEAT'}</div>
+            <div style={{ color: 'var(--text-secondary)' }}>{t('heatThreshold') || 'Max Temp ≥ 42°C'}</div>
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ fontSize: '1rem' }}>🌾</span>
           <div>
-            <div style={{ color: '#fff', fontWeight: 700 }}>BREAK RISK</div>
-            <div style={{ color: 'var(--text-secondary)' }}>Monsoon Break: HIGH</div>
+            <div style={{ color: '#fff', fontWeight: 700 }}>{getStatusLabel('BREAK RISK') || 'BREAK RISK'}</div>
+            <div style={{ color: 'var(--text-secondary)' }}>{t('breakRiskThreshold') || 'Monsoon Break: HIGH'}</div>
           </div>
         </div>
       </div>
@@ -299,14 +299,14 @@ export default function Alerts() {
                           border: `1px solid ${isCrit ? 'rgba(239, 68, 68, 0.4)' : 'rgba(245, 158, 11, 0.4)'}`,
                           letterSpacing: '0.04em'
                         }}>
-                          {al.type || 'WEATHER ALERT'}
+                          {getStatusLabel(al.type) || al.type || 'WEATHER ALERT'}
                         </span>
                         <span className={`badge ${isCrit ? 'badge-conflict' : isWarn ? 'badge-unverified' : 'badge-verified'}`}>
                           {getStatusLabel(al.severity || 'WARNING')}
                         </span>
                         {al.is_injected && (
                           <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.35)' }}>
-                            ⚡ Judge Demo Simulation
+                            {t('judgeDemoSimulation') || '⚡ Judge Demo Simulation'}
                           </span>
                         )}
                       </div>
@@ -317,8 +317,8 @@ export default function Alerts() {
                   </div>
 
                   <div style={{ textAlign: 'right', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                    <div>Source: <strong style={{ color: '#cbd5e1' }}>{al.source_label || 'Open-Meteo NWP'}</strong></div>
-                    <div>Issued: {formatTimestamp(al.timestamp)}</div>
+                    <div>{t('source') || 'Source'}: <strong style={{ color: '#cbd5e1' }}>{translateText(al.source_label) || 'Open-Meteo NWP'}</strong></div>
+                    <div>{t('issued') || 'Issued'}: {formatTimestamp(al.timestamp)}</div>
                   </div>
                 </div>
 
@@ -344,13 +344,13 @@ export default function Alerts() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontSize: '0.9rem' }}>⚡</span>
                     <span style={{ fontSize: '0.92rem', fontWeight: 800, color: isCrit ? '#fecaca' : '#fef3c7' }}>
-                      {al.action_required || 'Take precautionary field measures immediately.'}
+                      {translateText(al.action_required) || 'Take precautionary field measures immediately.'}
                     </span>
                   </div>
 
                   {al.parameter_trigger && (
                     <span style={{ fontSize: '0.74rem', color: isCrit ? '#f87171' : '#fbbf24', fontWeight: 600 }}>
-                      Trigger: {al.parameter_trigger}
+                      {t('parameterTrigger') || 'Trigger'}: {translateText(al.parameter_trigger)}
                     </span>
                   )}
                 </div>
@@ -435,7 +435,7 @@ export default function Alerts() {
                 {t('noAlerts')}
               </h3>
               <p style={{ margin: 0, fontSize: '0.84rem', color: '#94a3b8', maxWidth: '500px', lineHeight: 1.5 }}>
-                All meteorological parameters (24h rain &lt; 64.5 mm, wind &lt; 40 km/h, temperature &lt; 42°C, and monsoon break risk) are currently within safe agronomic thresholds for <strong>{getVillageLabel(villageName)}</strong>.
+                {t('allParametersSafeDesc')} <strong>{getVillageLabel(villageName)}</strong>.
               </p>
             </div>
             <button
@@ -457,7 +457,7 @@ export default function Alerts() {
                 transition: 'all 0.2s ease',
               }}
             >
-              <Zap size={14} /> Click to Inject Synthetic Heavy Rain Event (Demo)
+              <Zap size={14} /> {t('demoInjectAlert')}
             </button>
           </div>
         )}
@@ -477,7 +477,7 @@ export default function Alerts() {
           lineHeight: 1.5,
         }}
       >
-        <span>Data: Open-Meteo NWP Forecast & IMD Threshold Standards (64.5 mm / 24h Heavy Rain, 40 km/h Wind, 42°C Heat).</span>
+        <span>{t('alertsDataFooter')}</span>
       </footer>
     </div>
   );

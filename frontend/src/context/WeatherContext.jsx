@@ -234,13 +234,43 @@ export function WeatherProvider({ children }) {
   };
 
   // Demo alert injection and clear handlers
-  const handleInjectDemoAlert = async () => {
+  const handleInjectDemoAlert = async (alertType = 'HEAVY RAIN') => {
     try {
-      await injectDemoAlert(selectedVillageId);
+      await injectDemoAlert(selectedVillageId, alertType);
       const updated = await fetchFarmerAlerts(selectedVillageId, language);
       setAlerts(updated);
+      return updated;
     } catch (err) {
-      console.error('Error injecting demo alert:', err);
+      console.error('Error injecting demo alert, applying local synthetic state:', err);
+      const nowIso = new Date().toISOString();
+      const synthetic = alertType === 'BREAK RISK' ? {
+        id: `ALT_DEMO_BREAK_${Date.now()}`,
+        village_id: selectedVillageId,
+        type: "BREAK RISK",
+        severity: "WARNING",
+        title: "Monsoon Break Spell Warning (Demo Injection)",
+        message: "NWP multi-day ensemble projects extended dry spell (<10 mm rain over next 7 days).",
+        action_required: "Monsoon break likely, plan irrigation backup.",
+        parameter_trigger: "Monsoon Break Risk: HIGH (<10 mm / 7d)",
+        source_label: "GramWeather Monsoon Break Model (Pai et al. 2014)",
+        timestamp: nowIso,
+        is_injected: true,
+        is_active: true
+      } : {
+        id: `ALT_DEMO_RAIN_${Date.now()}`,
+        village_id: selectedVillageId,
+        type: "HEAVY RAIN",
+        severity: "CRITICAL",
+        title: "Severe Heavy Rain Warning (Demo Injection)",
+        message: "Forecast rainfall is 72.8 mm in next 24h, exceeding the IMD heavy rain threshold (64.5 mm).",
+        action_required: "Avoid irrigation, protect harvested produce.",
+        parameter_trigger: "Forecast Rain: 72.8 mm / 24h (≥ 64.5 mm)",
+        source_label: "Open-Meteo NWP Forecast (Demo Synthetic Event)",
+        timestamp: nowIso,
+        is_injected: true,
+        is_active: true
+      };
+      setAlerts(prev => [synthetic, ...(prev || []).filter(a => !a.is_injected)]);
     }
   };
 

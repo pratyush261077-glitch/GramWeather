@@ -161,10 +161,10 @@ export default function Verification({ inspectTarget }) {
           }}
         >
           <div style={{ fontWeight: 700, fontSize: '0.9rem', color: isVerified ? '#6ee7b7' : isConflict ? '#fca5a5' : '#fde68a' }}>
-            {translateText(verificationData?.summary) || t('connecting')}
+            {translateText(verificationData?.summary) || t('consensusMonitoring')}
           </div>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-primary)', marginTop: '4px' }}>
-            <strong>{t('actionImplication')}:</strong> {translateText(verificationData?.action_implication) || t('connecting')}
+            <strong>{t('actionImplication')}:</strong> {translateText(verificationData?.action_implication) || t('monitoringGroundConsensus')}
           </div>
         </div>
 

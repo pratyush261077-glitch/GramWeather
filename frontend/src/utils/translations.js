@@ -44,6 +44,49 @@ export const TRANSLATIONS = {
     smsFallbackLabel: "SMS (auto-fallback on 2G)",
     whatsappLabel: "WhatsApp",
     prototypeLabel: "Prototype",
+
+    // Monsoon Presets & Details
+    monsoonPresetsTitle: "Demo Presets (Jury Preview):",
+    presetLive: "Normal (Live)",
+    presetApproaching: "Approaching onset (DEMO)",
+    presetActive: "Active monsoon (DEMO)",
+    presetBreakRisk: "Break risk (DEMO)",
+    monsoonBreakAlertActive: "BREAK RISK ALERT ACTIVE: 7-day rain is 6 mm (High Break Risk). Dispatched to Alerts tab & Dashboard.",
+    viewInAlerts: "View in Alerts Tab →",
+    effectiveOnsetDetected: "Effective onset detected on",
+    criteriaMet: "(Pai et al. criteria met)",
+    onsetCriteriaDesc: "Criteria: 5-day cumulative rain ≥ 40 mm with ≥ 2 days ≥ 2.5 mm",
+    breakThresholdDesc: "Break Threshold: <10 mm (High), <15 mm (Mod)",
+    next7DaysForecast: "Next 7 Days Forecast (mm/day):",
+    confidenceBreakdownTitle: "Confidence Basis Breakdown:",
+    heuristicConfidence: "Heuristic Confidence",
+    heuristicDisclaimer: "*Heuristic score based on NWP delta; not an empirical probability.",
+    phaseLabel: "Phase:",
+    nonCalibrated: "Non-calibrated",
+
+    // Advisory Page Specifics
+    icarStyleThresholds: "ICAR-STYLE AGRONOMIC THRESHOLDS",
+    selectActiveFarmCrop: "Select Active Farm Crop:",
+    telemetryOpenMeteo: "Telemetry: Open-Meteo NWP Forecast",
+    rain7dLabel: "7d Rain:",
+    windLabel: "Wind:",
+    nextRainOutlook: "Next Rain Outlook:",
+    risk48hRain: "48h Rain Risk:",
+    leaching24h: "24h Leaching:",
+    ruleIrrigation: "Rule: ≥15 mm (Skip) · 5–15 mm (Halve) · <5 mm (Irrigate)",
+    ruleSpraying: "Rule: Wind >12 km/h or Rain <24h → Do NOT spray",
+    ruleHarvesting: "Rule: Rain within 48h → Harvest early / cover produce",
+    ruleFertilizer: "Rule: Rain within 24h → Hold fertilizer (prevents leaching)",
+    honestTransparency: "Honest Transparency:",
+    telemetrySourceFooter: "Meteorological parameters sourced from Open-Meteo NWP forecast.",
+
+    // Alerts Page Specifics
+    autonomousThresholdEngine: "AUTONOMOUS THRESHOLD EVENT ENGINE",
+    mockDispatchNote: "(Mock multi-channel dispatch; no real SMS gateway billed)",
+    judgeDemoSimulation: "Judge Demo Simulation",
+    sourceLabel: "Source:",
+    issuedLabel: "Issued:",
+    takePrecautionary: "Take precautionary field measures immediately.",
     navDashboard: "Dashboard",
     navVerification: "Verification Lab",
     navAdvisory: "AI Advisory",
@@ -204,6 +247,22 @@ export const TRANSLATIONS = {
     noAlerts: "No active severe weather warnings for this village.",
     demoInjectAlert: "Demo: Inject Alert",
     demoClearAlert: "Clear Demo Alert",
+    autonomousEngine: "AUTONOMOUS THRESHOLD EVENT ENGINE",
+    allParametersSafeDesc: "All meteorological parameters (24h rain < 64.5 mm, wind < 40 km/h, temperature < 42°C, and monsoon break risk) are currently within safe agronomic thresholds for",
+    heavyRainThreshold: "Rain ≥ 64.5 mm / 24h",
+    strongWindThreshold: "Wind ≥ 40 km/h",
+    heatThreshold: "Max Temp ≥ 42°C",
+    breakRiskThreshold: "Monsoon Break: HIGH",
+    mockDispatchNote: "(Mock multi-channel dispatch; no real SMS gateway billed)",
+    judgeDemoSimulation: "⚡ Judge Demo Simulation",
+    parameterTrigger: "Trigger",
+    source: "Source",
+    issued: "Issued",
+    alertsDataFooter: "Data: Open-Meteo NWP Forecast & IMD Threshold Standards (64.5 mm / 24h Heavy Rain, 40 km/h Wind, 42°C Heat).",
+    syncingTelemetry: "Syncing atmospheric telemetry...",
+    generatingAdvisory: "Generating ICAR decision advisory...",
+    consensusMonitoring: "Consensus synthesis active across satellite and local ground telemetry.",
+    monitoringGroundConsensus: "Monitoring atmospheric conditions and ground reports for consensus.",
 
     // History Screen
     historyTitle: "Historical Weather & CHIRPS Baseline",
@@ -216,7 +275,7 @@ export const TRANSLATIONS = {
     citationLabel: "Citation",
 
     // Common labels
-    connecting: "Connecting to village atmospheric telemetry...",
+    connecting: "Syncing atmospheric telemetry...",
     villageMapTitle: "Village Spatial Micro-Grid",
     villageMapSub: "Spatial mapping of village center, local IoT sensor nodes, and incoming weather systems.",
     liveBadge: "LIVE",
@@ -300,6 +359,49 @@ export const TRANSLATIONS = {
     smsFallbackLabel: "एसएमएस (2G पर ऑटो-फ़ॉलबैक)",
     whatsappLabel: "व्हाट्सएप",
     prototypeLabel: "प्रोटोटाइप",
+
+    // Monsoon Presets & Details
+    monsoonPresetsTitle: "डेमो प्रीसेट (जज पूर्वावलोकन):",
+    presetLive: "सामान्य (लाइव)",
+    presetApproaching: "आगमन निकट (डेमो)",
+    presetActive: "सक्रिय मानसून (डेमो)",
+    presetBreakRisk: "ब्रेक जोखिम (डेमो)",
+    monsoonBreakAlertActive: "मानसून ब्रेक अलर्ट सक्रिय: 7-दिवसीय वर्षा केवल 6 मिमी (उच्च ब्रेक जोखिम)। अलर्ट टैब और डैशबोर्ड पर प्रेषित।",
+    viewInAlerts: "अलर्ट टैब में देखें →",
+    effectiveOnsetDetected: "प्रभावी मानसून आगमन दर्ज:",
+    criteriaMet: "(पाई आदि मानदंड पूर्ण)",
+    onsetCriteriaDesc: "मानदंड: 5 दिनों में कुल वर्षा ≥ 40 मिमी और ≥ 2 दिन ≥ 2.5 मिमी",
+    breakThresholdDesc: "ब्रेक सीमा: <10 मिमी (उच्च), <15 मिमी (मध्यम)",
+    next7DaysForecast: "अगले 7 दिनों का पूर्वानुमान (मिमी/दिन):",
+    confidenceBreakdownTitle: "विश्वास स्कोर का आधार:",
+    heuristicConfidence: "गणितीय विश्वास स्कोर",
+    heuristicDisclaimer: "*गणितीय स्कोर मौसम मॉडल अंतर पर आधारित है; कोई सांख्यिकीय संभावना नहीं।",
+    phaseLabel: "चरण:",
+    nonCalibrated: "गैर-कैलिब्रेटेड",
+
+    // Advisory Page Specifics
+    icarStyleThresholds: "ICAR कृषि सीमा मानदंड",
+    selectActiveFarmCrop: "सक्रिय खेत की फसल चुनें:",
+    telemetryOpenMeteo: "मौसम डेटा: ओपन-मेटियो NWP पूर्वानुमान",
+    rain7dLabel: "7-दिन वर्षा:",
+    windLabel: "हवा:",
+    nextRainOutlook: "अगली वर्षा का अनुमान:",
+    risk48hRain: "48 घंटे वर्षा जोखिम:",
+    leaching24h: "24 घंटे उर्वरक बहाव:",
+    ruleIrrigation: "नियम: ≥15 मिमी (रोकें) · 5–15 मिमी (आधी करें) · <5 मिमी (सिंचाई करें)",
+    ruleSpraying: "नियम: हवा >12 किमी/घंटा या बारिश <24 घंटे → छिड़काव न करें",
+    ruleHarvesting: "नियम: 48 घंटे में बारिश → शीघ्र कटाई करें / उपज ढकें",
+    ruleFertilizer: "नियम: 24 घंटे में बारिश → खाद रोकें (पोषक तत्व बहने से बचाएं)",
+    honestTransparency: "पारदर्शिता:",
+    telemetrySourceFooter: "मौसम संबंधी आंकड़े ओपन-मेटियो NWP पूर्वानुमान से प्राप्त।",
+
+    // Alerts Page Specifics
+    autonomousThresholdEngine: "स्वायत्त सीमा चेतावनी इंजन",
+    mockDispatchNote: "(मॉक मल्टी-चैनल डिलीवरी; कोई वास्तविक एसएमएस गेटवे शुल्क नहीं)",
+    judgeDemoSimulation: "जज डेमो सिमुलेशन",
+    sourceLabel: "स्रोत:",
+    issuedLabel: "जारी:",
+    takePrecautionary: "तुरंत एहतियाती कृषि कदम उठाएं।",
     navDashboard: "डैशबोर्ड",
     navVerification: "सत्यापन लैब",
     navAdvisory: "कृषि सलाह",
@@ -453,14 +555,29 @@ export const TRANSLATIONS = {
 
     // Alerts Screen & Card
     alertsTitle: "प्रारंभिक चेतावनी एवं सतर्कता प्रणाली",
-    alertsSub: "मौसम संबंधी चेतावनियां एवं जरूरी सुरक्षा उपाय -",
-    actionRequired: "कार्रवाई निर्देश",
-    immediateAction: "तत्काल कार्रवाई",
+    alertsSub: "सक्रिय मौसम संबंधी अलर्ट एवं तत्काल सुरक्षात्मक उपाय -",
+    actionRequired: "आवश्यक कार्रवाई",
+    immediateAction: "तत्काल कदम",
     triggerMetric: "ट्रिगर मीट्रिक",
     noAlerts: "इस गाँव के लिए कोई गंभीर मौसम चेतावनी सक्रिय नहीं है।",
-    demoInjectAlert: "डेमो: चेतावनी इंजेक्ट करें",
-    demoClearAlert: "डेमो चेतावनी हटाएं",
-
+    demoInjectAlert: "डेमो: अलर्ट सिमुलेट करें",
+    demoClearAlert: "डेमो अलर्ट हटाएं",
+    autonomousEngine: "स्वायत्त थ्रेशोल्ड इवेंट इंजन",
+    allParametersSafeDesc: "सभी मौसम संबंधी पैरामीटर (24 घंटे की वर्षा < 64.5 मिमी, हवा < 40 किमी/घंटा, तापमान < 42°C, और मानसून ब्रेक जोखिम) वर्तमान में सुरक्षित कृषि सीमा में हैं -",
+    heavyRainThreshold: "वर्षा ≥ 64.5 मिमी / 24घंटे",
+    strongWindThreshold: "हवा ≥ 40 किमी/घंटा",
+    heatThreshold: "अधिकतम तापमान ≥ 42°C",
+    breakRiskThreshold: "मानसून ब्रेक: उच्च (HIGH)",
+    mockDispatchNote: "(प्रोटोटाइप मल्टी-चैनल डिलीवरी; कोई वास्तविक एसएमएस गेटवे शुल्क नहीं)",
+    judgeDemoSimulation: "⚡ जज डेमो सिमुलेशन",
+    parameterTrigger: "ट्रिगर",
+    source: "स्रोत",
+    issued: "जारी किया गया",
+    alertsDataFooter: "डेटा: Open-Meteo NWP पूर्वानुमान एवं IMD मानक (64.5 मिमी / 24घं भारी वर्षा, 40 किमी/घंटा हवा, 42°C गर्मी)।",
+    syncingTelemetry: "मौसम संबंधी आंकड़े सिंक हो रहे हैं...",
+    generatingAdvisory: "ICAR कृषि सलाह तैयार की जा रही है...",
+    consensusMonitoring: "उपग्रह और स्थानीय भू-डेटा के बीच सहमति विश्लेषण सक्रिय है।",
+    monitoringGroundConsensus: "सहमति के लिए वायुमंडलीय स्थितियों और जमीनी रिपोर्टों की निगरानी की जा रही है।",
 
     // History Screen
     historyTitle: "ऐतिहासिक मौसम एवं CHIRPS आधार रेखा",
@@ -473,7 +590,7 @@ export const TRANSLATIONS = {
     citationLabel: "संदर्भ",
 
     // Common labels
-    connecting: "गाँव के मौसम संबंधी आंकड़ों से कनेक्ट हो रहा है...",
+    connecting: "मौसम संबंधी आंकड़े सिंक हो रहे हैं...",
     villageMapTitle: "गाँव स्थानिक माइक्रो-ग्रिड",
     villageMapSub: "गाँव के केंद्र, स्थानीय IoT सेंसर नोड्स और आने वाले मौसम की मैपिंग।",
     liveBadge: "लाइव",
@@ -557,6 +674,49 @@ export const TRANSLATIONS = {
     smsFallbackLabel: "SMS (2G 'ਤੇ ਆਟੋ-ਫਾਲਬੈਕ)",
     whatsappLabel: "ਵਟਸਐਪ",
     prototypeLabel: "ਪ੍ਰੋਟੋਟਾਈਪ",
+
+    // Monsoon Presets & Details
+    monsoonPresetsTitle: "ਡੈਮੋ ਪ੍ਰੀਸੈੱਟ (ਜੱਜ ਪ੍ਰੀਵਿਊ):",
+    presetLive: "ਸਧਾਰਨ (ਲਾਈਵ)",
+    presetApproaching: "ਆਮਦ ਨੇੜੇ (ਡੈਮੋ)",
+    presetActive: "ਸਰਗਰਮ ਮਾਨਸੂਨ (ਡੈਮੋ)",
+    presetBreakRisk: "ਬ੍ਰੇਕ ਖ਼ਤਰਾ (ਡੈਮੋ)",
+    monsoonBreakAlertActive: "ਮਾਨਸੂਨ ਬ੍ਰੇਕ ਅਲਰਟ ਸਰਗਰਮ: 7-ਦਿਨਾਂ ਮੀਂਹ ਕੇਵਲ 6 ਮਿਲੀਮੀਟਰ (ਉੱਚ ਬ੍ਰੇਕ ਖ਼ਤਰਾ)। ਅਲਰਟ ਟੈਬ ਅਤੇ ਡੈਸ਼ਬੋਰਡ 'ਤੇ ਭੇਜਿਆ ਗਿਆ।",
+    viewInAlerts: "ਅਲਰਟ ਟੈਬ ਵਿੱਚ ਦੇਖੋ →",
+    effectiveOnsetDetected: "ਪ੍ਰਭਾਵੀ ਮਾਨਸੂਨ ਆਮਦ ਦਰਜ:",
+    criteriaMet: "(ਪਾਈ ਆਦਿ ਮਾਪਦੰਡ ਪੂਰੇ)",
+    onsetCriteriaDesc: "ਮਾਪਦੰਡ: 5 ਦਿਨਾਂ ਵਿੱਚ ਕੁੱਲ ਮੀਂਹ ≥ 40 ਮਿਲੀਮੀਟਰ ਅਤੇ ≥ 2 ਦਿਨ ≥ 2.5 ਮਿਲੀਮੀਟਰ",
+    breakThresholdDesc: "ਬ੍ਰੇਕ ਸੀਮਾ: <10 ਮਿਲੀਮੀਟਰ (ਉੱਚ), <15 ਮਿਲੀਮੀਟਰ (ਦਰਮਿਆਨਾ)",
+    next7DaysForecast: "ਅਗਲੇ 7 ਦਿਨਾਂ ਦਾ ਪੂਰਵ-ਅਨੁਮਾਨ (ਮਿਲੀਮੀਟਰ/ਦਿਨ):",
+    confidenceBreakdownTitle: "ਭਰੋਸੇਯੋਗਤਾ ਸਕੋਰ ਦਾ ਆਧਾਰ:",
+    heuristicConfidence: "ਹਿਊਰਿਸਟਿਕ ਭਰੋਸੇਯੋਗਤਾ",
+    heuristicDisclaimer: "*ਹਿਊਰਿਸਟਿਕ ਸਕੋਰ ਮੌਸਮ ਮਾਡਲ ਅੰਤਰ 'ਤੇ ਅਧਾਰਿਤ ਹੈ; ਕੋਈ ਸੰਭਾਵਨਾ ਨਹੀਂ।",
+    phaseLabel: "ਪੜਾਅ:",
+    nonCalibrated: "ਗੈਰ-ਕੈਲੀਬ੍ਰੇਟਿਡ",
+
+    // Advisory Page Specifics
+    icarStyleThresholds: "ICAR ਖੇਤੀ ਮਾਪਦੰਡ",
+    selectActiveFarmCrop: "ਖੇਤ ਦੀ ਫ਼ਸਲ ਚੁਣੋ:",
+    telemetryOpenMeteo: "ਮੌਸਮ ਡਾਟਾ: ਓਪਨ-ਮੈਟਿਓ NWP ਪੂਰਵ-ਅਨੁਮਾਨ",
+    rain7dLabel: "7-ਦਿਨ ਮੀਂਹ:",
+    windLabel: "ਹਵਾ:",
+    nextRainOutlook: "ਅਗਲੇ ਮੀਂਹ ਦਾ ਅਨੁਮਾਨ:",
+    risk48hRain: "48 ਘੰਟੇ ਮੀਂਹ ਖ਼ਤਰਾ:",
+    leaching24h: "24 ਘੰਟੇ ਖਾਦ ਬਹਾਅ:",
+    ruleIrrigation: "ਨਿਯਮ: ≥15 ਮਿਲੀਮੀਟਰ (ਰੋਕੋ) · 5–15 ਮਿਲੀਮੀਟਰ (ਅੱਧੀ ਕਰੋ) · <5 ਮਿਲੀਮੀਟਰ (ਸਿੰਚਾਈ ਕਰੋ)",
+    ruleSpraying: "ਨਿਯਮ: ਹਵਾ >12 ਕਿਮੀ/ਘੰਟਾ ਜਾਂ ਮੀਂਹ <24 ਘੰਟੇ → ਛਿੜਕਾਅ ਨਾ ਕਰੋ",
+    ruleHarvesting: "ਨਿਯਮ: 48 ਘੰਟਿਆਂ ਵਿੱਚ ਮੀਂਹ → ਜਲਦੀ ਵਾਢੀ ਕਰੋ / ਫ਼ਸਲ ਢੱਕੋ",
+    ruleFertilizer: "ਨਿਯਮ: 24 ਘੰਟਿਆਂ ਵਿੱਚ ਮੀਂਹ → ਖਾਦ ਰੋਕੋ (ਖੁਰਾਕੀ ਤੱਤ ਰੁੜ੍ਹਨ ਤੋਂ ਬਚਾਓ)",
+    honestTransparency: "ਪਾਰਦਰਸ਼ਤਾ:",
+    telemetrySourceFooter: "ਮੌਸਮ ਡਾਟਾ ਓਪਨ-ਮੈਟਿਓ NWP ਪੂਰਵ-ਅਨੁਮਾਨ ਤੋਂ ਪ੍ਰਾਪਤ।",
+
+    // Alerts Page Specifics
+    autonomousThresholdEngine: "ਆਟੋਨੋਮਸ ਥ੍ਰੈਸ਼ਹੋਲਡ ਅਲਰਟ ਇੰਜਣ",
+    mockDispatchNote: "(ਮੌਕ ਮਲਟੀ-ਚੈਨਲ ਡਿਸਪੈਚ; ਕੋਈ ਅਸਲ SMS ਗੇਟਵੇ ਬਿਲ ਨਹੀਂ)",
+    judgeDemoSimulation: "ਜੱਜ ਡੈਮੋ ਸਿਮੂਲੇਸ਼ਨ",
+    sourceLabel: "ਸਰੋਤ:",
+    issuedLabel: "ਜਾਰੀ:",
+    takePrecautionary: "ਤੁਰੰਤ ਖੇਤ ਵਿੱਚ ਸਾਵਧਾਨੀ ਦੇ ਕਦਮ ਚੁੱਕੋ।",
     navDashboard: "ਡੈਸ਼ਬੋਰਡ",
     navVerification: "ਤਸਦੀਕ ਲੈਬ",
     navAdvisory: "ਖੇਤੀ ਸਲਾਹ",
@@ -710,13 +870,29 @@ export const TRANSLATIONS = {
 
     // Alerts Screen & Card
     alertsTitle: "ਅਗਾਊਂ ਚੇਤਾਵਨੀ ਪ੍ਰਣਾਲੀ",
-    alertsSub: "ਮੌਸਮ ਸੰਬੰਧੀ ਚੇਤਾਵਨੀਆਂ ਅਤੇ ਜ਼ਰੂਰੀ ਕਦਮ -",
-    actionRequired: "ਕਾਰਵਾਈ ਨਿਰਦੇਸ਼",
-    immediateAction: "ਤੁਰੰਤ ਕਾਰਵਾਈ",
-    triggerMetric: "ਟ੍ਰਿਗਰ ਮਾਪਦੰਡ",
-    noAlerts: "ਇਸ ਪਿੰਡ ਲਈ ਕੋਈ ਗੰਭੀਰ ਮੌਸਮ ਚੇਤਾਵਨੀ ਨਹੀਂ ਹੈ।",
-    demoInjectAlert: "ਡੈਮੋ: ਚੇਤਾਵਨੀ ਲਾਗੂ ਕਰੋ",
-    demoClearAlert: "ਡੈਮੋ ਚੇਤਾਵਨੀ ਹਟਾਓ",
+    alertsSub: "ਸਰਗਰਮ ਮੌਸਮੀ ਅਲਰਟ ਅਤੇ ਜ਼ਰੂਰੀ ਬਚਾਅ ਉਪਾਅ -",
+    actionRequired: "ਲੋੜੀਂਦੀ ਕਾਰਵਾਈ",
+    immediateAction: "ਤੁਰੰਤ ਕਦਮ",
+    triggerMetric: "ਟ੍ਰਿਗਰ ਮੀਟ੍ਰਿਕ",
+    noAlerts: "ਇਸ ਪਿੰਡ ਲਈ ਕੋਈ ਗੰਭੀਰ ਮੌਸਮ ਚੇਤਾਵਨੀ ਸਰਗਰਮ ਨਹੀਂ ਹੈ।",
+    demoInjectAlert: "ਡੈਮੋ: ਅਲਰਟ ਸਿਮੂਲੇਟ ਕਰੋ",
+    demoClearAlert: "ਡੈਮੋ ਅਲਰਟ ਹਟਾਓ",
+    autonomousEngine: "ਸਵੈ-ਚਾਲਿਤ ਥ੍ਰੈਸ਼ਹੋਲਡ ਈਵੈਂਟ ਇੰਜਣ",
+    allParametersSafeDesc: "ਸਾਰੇ ਮੌਸਮੀ ਪੈਰਾਮੀਟਰ (24 ਘੰਟੇ ਮੀਂਹ < 64.5 ਮਿਲੀਮੀਟਰ, ਹਵਾ < 40 ਕਿਲੋਮੀਟਰ/ਘੰਟਾ, ਤਾਪਮਾਨ < 42°C, ਅਤੇ ਮਾਨਸੂਨ ਬ੍ਰੇਕ ਖ਼ਤਰਾ) ਫ਼ਿਲਹਾਲ ਸੁਰੱਖਿਅਤ ਖੇਤੀ ਸੀਮਾ ਵਿੱਚ ਹਨ -",
+    heavyRainThreshold: "ਮੀਂਹ ≥ 64.5 ਮਿਲੀਮੀਟਰ / 24 ਘੰਟੇ",
+    strongWindThreshold: "ਹਵਾ ≥ 40 ਕਿਲੋਮੀਟਰ/ਘੰਟਾ",
+    heatThreshold: "ਵੱਧ ਤੋਂ ਵੱਧ ਤਾਪਮਾਨ ≥ 42°C",
+    breakRiskThreshold: "ਮਾਨਸੂਨ ਬ੍ਰੇਕ: ਉੱਚ (HIGH)",
+    mockDispatchNote: "(ਪ੍ਰੋਟੋਟਾਈਪ ਮਲਟੀ-ਚੈਨਲ ਡਿਲੀਵਰੀ; ਕੋਈ ਅਸਲ ਐਸਐਮਐਸ ਗੇਟਵੇ ਖ਼ਰਚਾ ਨਹੀਂ)",
+    judgeDemoSimulation: "⚡ ਜੱਜ ਡੈਮੋ ਸਿਮੂਲੇਸ਼ਨ",
+    parameterTrigger: "ਟ੍ਰਿਗਰ",
+    source: "ਸਰੋਤ",
+    issued: "ਜਾਰੀ ਕੀਤਾ ਗਿਆ",
+    alertsDataFooter: "ਡਾਟਾ: Open-Meteo NWP ਪੂਰਵ-ਅਨੁਮਾਨ ਅਤੇ IMD ਮਾਪਦੰਡ (64.5 ਮਿਲੀਮੀਟਰ / 24 ਘੰਟੇ ਭਾਰੀ ਮੀਂਹ, 40 ਕਿਲੋਮੀਟਰ/ਘੰਟਾ ਹਵਾ, 42°C ਗਰਮੀ)।",
+    syncingTelemetry: "ਮੌਸਮ ਸੰਬੰਧੀ ਅੰਕੜੇ ਸਿੰਕ ਹੋ ਰਹੇ ਹਨ...",
+    generatingAdvisory: "ICAR ਖੇਤੀ ਸਲਾਹ ਤਿਆਰ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ...",
+    consensusMonitoring: "ਸੈਟੇਲਾਈਟ ਅਤੇ ਸਥਾਨਕ ਜ਼ਮੀਨੀ ਡਾਟਾ ਵਿਚਕਾਰ ਸਹਿਮਤੀ ਵਿਸ਼ਲੇਸ਼ਣ ਸਰਗਰਮ ਹੈ।",
+    monitoringGroundConsensus: "ਸਹਿਮਤੀ ਲਈ ਵਾਯੂਮੰਡਲੀ ਹਾਲਤਾਂ ਅਤੇ ਜ਼ਮੀਨੀ ਰਿਪੋਰਟਾਂ ਦੀ ਨਿਗਰਾਨੀ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ।",
 
     // History Screen
     historyTitle: "ਇਤਿਹਾਸਕ ਮੌਸਮ ਅਤੇ CHIRPS ਬੈਂਚਮਾਰਕ",
@@ -729,7 +905,7 @@ export const TRANSLATIONS = {
     citationLabel: "ਹਵਾਲਾ",
 
     // Common labels
-    connecting: "ਪਿੰਡ ਦੇ ਮੌਸਮ ਡਾਟਾ ਨਾਲ ਜੁੜ ਰਿਹਾ ਹੈ...",
+    connecting: "ਮੌਸਮ ਸੰਬੰਧੀ ਅੰਕੜੇ ਸਿੰਕ ਹੋ ਰਹੇ ਹਨ...",
     villageMapTitle: "ਪਿੰਡ ਸਥਾਨਕ ਮਾਈਕ੍ਰੋ-ਗ੍ਰਿਡ",
     villageMapSub: "ਪਿੰਡ ਕੇਂਦਰ, ਸੈਂਸਰ ਨੋਡਾਂ ਅਤੇ ਆਉਣ ਵਾਲੇ ਮੌਸਮ ਦੀ ਮੈਪਿੰਗ।",
     liveBadge: "ਲਾਈਵ",
@@ -859,6 +1035,27 @@ export const STATUS_LABELS = {
     'INFO': 'सूचना (INFO)',
     'LOW': 'निम्न (LOW)',
     'HIGH': 'उच्च (HIGH)',
+    'DECLARED': 'आगमन घोषित (DECLARED)',
+    'IN PROGRESS': 'प्रगति पर (IN PROGRESS)',
+    'IN_PROGRESS': 'प्रगति पर (IN PROGRESS)',
+    'APPROACHING': 'आगमन निकट (APPROACHING)',
+    'ACTIVE': 'सक्रिय (ACTIVE)',
+    'ACTIVE_MONSOON': 'सक्रिय मानसून (ACTIVE)',
+    'PRE_MONSOON': 'प्री-मानसून (PRE-MONSOON)',
+    'BREAK_SPELL': 'ब्रेक स्पेल (BREAK SPELL)',
+    'DELAYED': 'विलंबित (DELAYED)',
+    'SAFE': 'सुरक्षित (SAFE)',
+    'CAUTION': 'सावधानी (CAUTION)',
+    'DANGER': 'खतरा (DANGER)',
+    'NORMAL': 'सामान्य (NORMAL)',
+    'Likely': 'संभावित',
+    'Low': 'कम',
+    'Safe Window': 'सुरक्षित समय',
+    'High Risk': 'उच्च जोखिम',
+    'HEAVY RAIN': 'भारी बारिश (HEAVY RAIN)',
+    'STRONG WIND': 'तेज हवा (STRONG WIND)',
+    'HEAT': 'अत्यधिक गर्मी (HEAT)',
+    'BREAK RISK': 'मानसून ब्रेक (BREAK RISK)',
   },
   pa: {
     'VERIFIED': 'ਤਸਦੀਕਸ਼ੁਦਾ (VERIFIED)',
@@ -871,6 +1068,27 @@ export const STATUS_LABELS = {
     'INFO': 'ਸੂਚਨਾ (INFO)',
     'LOW': 'ਘੱਟ (LOW)',
     'HIGH': 'ਜ਼ਿਆਦਾ (HIGH)',
+    'DECLARED': 'ਆਮਦ ਐਲਾਨੀ (DECLARED)',
+    'IN PROGRESS': 'ਪ੍ਰਗਤੀ ਅਧੀਨ (IN PROGRESS)',
+    'IN_PROGRESS': 'ਪ੍ਰਗਤੀ ਅਧੀਨ (IN PROGRESS)',
+    'APPROACHING': 'ਆਮਦ ਨੇੜੇ (APPROACHING)',
+    'ACTIVE': 'ਸਰਗਰਮ (ACTIVE)',
+    'ACTIVE_MONSOON': 'ਸਰਗਰਮ ਮਾਨਸੂਨ (ACTIVE)',
+    'PRE_MONSOON': 'ਪ੍ਰੀ-ਮਾਨਸੂਨ (PRE-MONSOON)',
+    'BREAK_SPELL': 'ਬ੍ਰੇਕ ਸਪੈੱਲ (BREAK SPELL)',
+    'DELAYED': 'ਦੇਰੀ ਨਾਲ (DELAYED)',
+    'SAFE': 'ਸੁਰੱਖਿਅਤ (SAFE)',
+    'CAUTION': 'ਸਾਵਧਾਨੀ (CAUTION)',
+    'DANGER': 'ਖ਼ਤਰਾ (DANGER)',
+    'NORMAL': 'ਸਧਾਰਨ (NORMAL)',
+    'Likely': 'ਸੰਭਾਵਿਤ',
+    'Low': 'ਘੱਟ',
+    'Safe Window': 'ਸੁਰੱਖਿਅਤ ਸਮਾਂ',
+    'High Risk': 'ਉੱਚ ਖ਼ਤਰਾ',
+    'HEAVY RAIN': 'ਭਾਰੀ ਮੀਂਹ (HEAVY RAIN)',
+    'STRONG WIND': 'ਤੇਜ਼ ਹਵਾ (STRONG WIND)',
+    'HEAT': 'ਅਤਿ ਗਰਮੀ (HEAT)',
+    'BREAK RISK': 'ਮਾਨਸੂਨ ਬ੍ਰੇਕ (BREAK RISK)',
   }
 };
 
@@ -992,6 +1210,183 @@ export function translateDynamicText(text, lang = 'en') {
     if (text.includes('Assessing runoff and leaching thresholds')) {
       return 'उर्वरक बहाव और पोषक तत्वों के नुकसान का आकलन किया जा रहा है...';
     }
+
+    // Alerts Actions, Messages & Trigger Parameters (Hindi)
+    if (text.includes('Avoid irrigation, protect harvested produce')) {
+      return 'सिंचाई रोकें, कटी हुई फसल को सुरक्षित करें।';
+    }
+    if (text.includes('Secure vulnerable crops and structures')) {
+      return 'कमजोर फसलों और संरचनाओं को सुरक्षित करें।';
+    }
+    if (text.includes('High temperature, check crop water needs')) {
+      return 'अत्यधिक तापमान, फसल की पानी की जरूरत जांचें।';
+    }
+    if (text.includes('Monsoon break likely, plan irrigation backup')) {
+      return 'मानसून ब्रेक की संभावना, सिंचाई का वैकल्पिक प्रबंध करें।';
+    }
+    if (text.includes('Severe Heavy Rain Warning')) {
+      return 'अति भारी वर्षा चेतावनी (डेमो सिमुलेशन)';
+    }
+    if (text.includes('Monsoon Break Spell Warning')) {
+      return 'मानसून ब्रेक ड्राई स्पेल चेतावनी (डेमो सिमुलेशन)';
+    }
+    if (text.includes('Forecast rainfall is 72.8 mm')) {
+      return 'अगले 24 घंटों में 72.8 मिमी वर्षा का अनुमान है, जो मौसम विभाग IMD की भारी बारिश सीमा (64.5 मिमी) से अधिक है।';
+    }
+    if (text.includes('NWP multi-day ensemble projects extended dry spell')) {
+      return 'मौसम मॉडल के अनुसार अगले 7 दिनों में सूखा मौसम (<10 मिमी वर्षा) रहने का अनुमान है।';
+    }
+    if (text.includes('Forecast Rain: 72.8 mm')) {
+      return 'पूर्वानुमान वर्षा: 72.8 मिमी / 24 घंटे (≥ 64.5 मिमी)';
+    }
+    if (text.includes('Monsoon Break Risk: HIGH')) {
+      return 'मानसून ब्रेक जोखिम: उच्च (<10 मिमी / 7 दिन)';
+    }
+    if (text.includes('Take precautionary field measures immediately')) {
+      return 'तुरंत एहतियाती कृषि कदम उठाएं।';
+    }
+
+    // ICAR Rules Decisions (Hindi)
+    if (text.includes('Skip irrigation; rain expected. Recheck after rain')) {
+      return 'सिंचाई रोकें; वर्षा की संभावना है। वर्षा के बाद पुनः निरीक्षण करें।';
+    }
+    if (text.includes('Reduce irrigation by half and recheck soil moisture')) {
+      return 'सिंचाई आधी कर दें और मिट्टी की नमी की पुनः जांच करें।';
+    }
+    if (text.includes('Irrigate as per crop stage; soil likely drying')) {
+      return 'फसल अवस्था अनुसार सिंचाई करें; मिट्टी सूख रही है।';
+    }
+    if (text.includes('Do NOT spray (wind drift)')) {
+      return 'छिड़काव न करें (हवा से दवा उड़ने का खतरा)।';
+    }
+    if (text.includes('Do NOT spray; rain will wash off')) {
+      return 'छिड़काव न करें; बारिश से दवा धुल जाएगी।';
+    }
+    if (text.includes('Safe window: next 24-36h')) {
+      return 'सुरक्षित समय: अगले 24-36 घंटे छिड़काव हेतु अनुकूल।';
+    }
+    if (text.includes('Harvest early / cover produce')) {
+      return 'शीघ्र कटाई करें / कटी उपज को तिरपाल से ढकें।';
+    }
+    if (text.includes('Favorable for harvest')) {
+      return 'कटाई एवं सुखाने हेतु अनुकूल मौसम।';
+    }
+    if (text.includes('Hold fertilizer; rain will leach nutrients')) {
+      return 'उर्वरक प्रयोग रोकें; बारिश से पोषक तत्व बह जाएंगे।';
+    }
+    if (text.includes('Top-dress on schedule')) {
+      return 'निर्धारित समय पर यूरिया/खाद की टॉप-ड्रेसिंग करें।';
+    }
+    if (text.includes('Rule-based ICAR advisory, not expert instruction')) {
+      return 'नियम-आधारित ICAR सलाह, विशेषज्ञ निर्देश नहीं।';
+    }
+
+    // Next Rain Indicators (Hindi)
+    if (text.includes('Rain likely within 24h')) {
+      return '24 घंटे में बारिश की संभावना';
+    }
+    if (text.includes('Rain expected within 48h')) {
+      return '48 घंटे में बारिश संभावित';
+    }
+    if (text.includes('None in next 48h')) {
+      return 'अगले 48 घंटे में बारिश नहीं';
+    }
+
+    // Monsoon Presets Advisory (Hindi)
+    if (text.includes('Onset approaching with substantial pre-monsoon showers')) {
+      return 'मानसून आगमन निकट है और पर्याप्त प्री-मानसून वर्षा (~45 मिमी) संभावित है। खेत की मेड़बंदी पूरी करें और समय पर बुवाई के लिए प्रमाणित बीज प्राप्त करें।';
+    }
+    if (text.includes('Reduce or pause irrigation as pre-monsoon wetting begins')) {
+      return 'सिंचाई कम करें या रोकें क्योंकि गाँव के सूक्ष्म-क्षेत्र में प्री-मानसून वर्षा शुरू हो रही है।';
+    }
+    if (text.includes('Monsoon declared active. Soil moisture profile optimal')) {
+      return 'मानसून सक्रिय घोषित। मिट्टी की नमी बुवाई के लिए अनुकूल है। ब्लॉक की समय-सारणी अनुसार खरीफ फसलों की मानक बुवाई करें।';
+    }
+    if (text.includes('Maintain regular irrigation intervals as needed; supplement with tube-well')) {
+      return 'आवश्यकतानुसार नियमित सिंचाई अंतराल बनाए रखें; मध्यम शुष्क अवधि में ट्यूबवेल से पूरक सिंचाई करें।';
+    }
+    if (text.includes('Monsoon active but extended dry break spell')) {
+      return 'मानसून सक्रिय है परंतु लंबा ड्राई स्पेल (<10 मिमी वर्षा / 7 दिन) दर्ज हुआ है। नई रोपाई रोकें और खेत की नमी बचाएं।';
+    }
+    if (text.includes('Hold sowing until cumulative rain reaches at least 40 mm')) {
+      return 'बुवाई तब तक रोकें जब तक 5 दिनों में कुल वर्षा 40 मिमी तक न पहुंच जाए। बीज डालने से पहले दैनिक वर्षा पर नज़र रखें।';
+    }
+    if (text.includes('Continue irrigation as needed. Supplement with available water storage')) {
+      return 'आवश्यकतानुसार सिंचाई जारी रखें। शुष्क मौसम में उपलब्ध जल भंडारण का उपयोग करें।';
+    }
+
+    // Confidence Basis Items (Hindi)
+    if (text.includes('Detected onset within ±7 days of climatological normal')) {
+      return 'जलवायु सामान्य तिथि के ±7 दिनों के भीतर मानसून आगमन (+20)';
+    }
+    if (text.includes('NWP forecast agreement with seasonal timing')) {
+      return 'मौसमी समय के साथ मौसम मॉडल का सामंजस्य (+20)';
+    }
+    if (text.includes('Pre-monsoon trough advancing northwestward')) {
+      return 'प्री-मानसून ट्रफ उत्तर-पश्चिम की ओर बढ़ रहा है (+25)';
+    }
+    if (text.includes('Convective precipitation cluster within 150 km radius')) {
+      return '150 किमी के दायरे में बादलों का समूह वर्षा दर्ज कर रहा है (+25)';
+    }
+    if (text.includes('Multi-model ensemble signals onset within 7-day window')) {
+      return 'मल्टी-मॉडल पूर्वानुमान अगले 7 दिनों में आगमन का संकेत दे रहा है (+22)';
+    }
+    if (text.includes('Pai et al. threshold met: 5-day rain cumulative > 40 mm')) {
+      return 'पाई आदि मानक पूर्ण: 5 दिनों में कुल वर्षा > 40 मिमी (+35)';
+    }
+    if (text.includes('Westerlies depth established up to 500 hPa')) {
+      return '500 hPa तक मानसूनी पश्चिमी हवाओं की गहराई स्थापित (+30)';
+    }
+    if (text.includes('Surface relative humidity sustained above 70%')) {
+      return 'सतह पर सापेक्ष आर्द्रता 70% से अधिक बनी हुई है (+20)';
+    }
+    if (text.includes('Monsoon trough shifted north toward Himalayan foothills')) {
+      return 'मानसून ट्रफ उत्तर में हिमालय की तलहटी की ओर खिसक गया है (+35)';
+    }
+    if (text.includes('7-day rainfall forecast collapses below 10 mm threshold')) {
+      return 'अगले 7 दिनों का वर्षा पूर्वानुमान 10 मिमी सीमा से नीचे गिर गया (+35)';
+    }
+    if (text.includes('Mid-tropospheric anticyclone encroaching Northwest India')) {
+      return 'मध्य-क्षोभमंडलीय एंटीसाइक्लोन उत्तर-पश्चिम भारत पर सक्रिय (+18)';
+    }
+
+    // Agronomic Crop Guidance Notes (Hindi)
+    if (text.includes('Crown Root Initiation (CRI at 21 days)')) {
+      return 'ताज जड़ फुटाव (21 दिन पर CRI) और कल्ले फूटने की अवस्था में नमी अत्यंत जरूरी है। समतल खेतों में जलभराव से बचें।';
+    }
+    if (text.includes('Target broadleaf weedicide (2,4-D)')) {
+      return 'चौड़ी पत्ती वाले खरपतवारनाशी (2,4-D) या पीला रतुआ फफूंदनाशक (प्रोपिकोनाजोल) का प्रयोग करें। पत्तियां सूखी होनी चाहिए।';
+    }
+    if (text.includes('Ensure grain moisture is below 12%')) {
+      return 'भंडारण से पहले सुनिश्चित करें कि दानों में नमी 12% से कम हो ताकि घुन व फफूंद से बचाव हो सके।';
+    }
+    if (text.includes('Apply 2nd split of Urea (65 kg/acre)')) {
+      return 'सिंचाई से पहले यूरिया की दूसरी किस्त (65 किग्रा/एकड़) डालें। नम मिट्टी में नाइट्रोजन का अवशोषण सबसे अच्छा होता है।';
+    }
+    if (text.includes('Maintain 2–5 cm standing water during active vegetative')) {
+      return 'कल्ले फूटने के समय खेत में 2–5 सेमी पानी बनाए रखें। कटाई से पहले अतिरिक्त पानी निकाल दें।';
+    }
+    if (text.includes('Target stem borer or blast treatment')) {
+      return 'तना छेदक या ब्लास्ट रोग के उपचार हेतु छिड़काव करें; दवा चिपकने हेतु कम से कम 4–6 घंटे बारिश न हो।';
+    }
+    if (text.includes('Drain field 10–14 days prior to harvest')) {
+      return 'कटाई से 10–14 दिन पहले खेत से पानी निकाल दें। सूखती धान की पूलों को ओस और नमी से बचाएं।';
+    }
+    if (text.includes('Apply nitrogen in 3 equal splits')) {
+      return 'नाइट्रोजन को 3 बराबर किस्तों में डालें: बुवाई पर, कल्ले फूटने पर और बालियां निकलने पर। बहते पानी में न डालें।';
+    }
+    if (text.includes('Maize is highly sensitive to waterlogging')) {
+      return 'मक्का जलभराव के प्रति अत्यंत संवेदनशील है। जल निकासी की नालियां साफ़ रखें; नर मंजरी आने पर नालियों में सिंचाई करें।';
+    }
+    if (text.includes('Direct spray into leaf whorls for Fall Armyworm')) {
+      return 'फॉल आर्मीवर्म (FAW) की रोकथाम के लिए शांत हवा (<12 किमी/घंटा) में पोंगे के अंदर सीधा छिड़काव करें।';
+    }
+    if (text.includes('Harvest cobs when outer husk turns dry parchment brown')) {
+      return 'जब बाहरी छिलका सूखकर भूरा हो जाए तब भुट्टे तोड़ें। एफ्लाटॉक्सिन से बचाव हेतु <14% नमी तक धूप में सुखाएं।';
+    }
+    if (text.includes('Side-dress Urea (40 kg/acre) at knee-high stage')) {
+      return 'घुटने की ऊंचाई (V6) पर कतारों के साथ यूरिया (40 किग्रा/एकड़) डालें और पौधे गिरने से बचाने हेतु मिट्टी चढ़ाएं।';
+    }
   }
 
   if (lang === 'pa') {
@@ -1030,6 +1425,183 @@ export function translateDynamicText(text, lang = 'en') {
     }
     if (text.includes('Farmer advisory: Safe to proceed with field operations')) {
       return 'ਕਿਸਾਨ ਸਲਾਹ: ਖੇਤ ਦੇ ਕੰਮ ਆਮ ਵਾਂਗ ਜਾਰੀ ਰੱਖੇ ਜਾ ਸਕਦੇ ਹਨ।';
+    }
+
+    // Alerts Actions, Messages & Trigger Parameters (Punjabi)
+    if (text.includes('Avoid irrigation, protect harvested produce')) {
+      return 'ਸਿੰਚਾਈ ਰੋਕੋ, ਵੱਢੀ ਹੋਈ ਫ਼ਸਲ ਨੂੰ ਸੁਰੱਖਿਅਤ ਕਰੋ।';
+    }
+    if (text.includes('Secure vulnerable crops and structures')) {
+      return 'ਕਮਜ਼ੋਰ ਫ਼ਸਲਾਂ ਅਤੇ ਢਾਂਚਿਆਂ ਨੂੰ ਸਹਾਰਾ ਦਿਓ।';
+    }
+    if (text.includes('High temperature, check crop water needs')) {
+      return 'ਅਤਿਅੰਤ ਗਰਮੀ, ਫ਼ਸਲ ਲਈ ਪਾਣੀ ਦੀ ਲੋੜ ਜਾਂਚੋ।';
+    }
+    if (text.includes('Monsoon break likely, plan irrigation backup')) {
+      return 'ਮਾਨਸੂਨ ਬ੍ਰੇਕ ਦਾ ਖ਼ਤਰਾ, ਸਿੰਚਾਈ ਦਾ ਬੈਕਅੱਪ ਤਿਆਰ ਰੱਖੋ।';
+    }
+    if (text.includes('Severe Heavy Rain Warning')) {
+      return 'ਬਹੁਤ ਭਾਰੀ ਮੀਂਹ ਦੀ ਚੇਤਾਵਨੀ (ਡੈਮੋ ਸਿਮੂਲੇਸ਼ਨ)';
+    }
+    if (text.includes('Monsoon Break Spell Warning')) {
+      return 'ਮਾਨਸੂਨ ਬ੍ਰੇਕ ਚੇਤਾਵਨੀ (ਡੈਮੋ ਸਿਮੂਲੇਸ਼ਨ)';
+    }
+    if (text.includes('Forecast rainfall is 72.8 mm')) {
+      return 'ਅਗਲੇ 24 ਘੰਟਿਆਂ ਵਿੱਚ 72.8 ਮਿਲੀਮੀਟਰ ਮੀਂਹ ਦਾ ਅਨੁਮਾਨ ਹੈ, ਜੋ ਮੌਸਮ ਵਿਭਾਗ ਦੀ ਭਾਰੀ ਮੀਂਹ ਸੀਮਾ (64.5 ਮਿਲੀਮੀਟਰ) ਤੋਂ ਵੱਧ ਹੈ।';
+    }
+    if (text.includes('NWP multi-day ensemble projects extended dry spell')) {
+      return 'ਮੌਸਮ ਮਾਡਲ ਅਨੁਸਾਰ ਅਗਲੇ 7 ਦਿਨਾਂ ਵਿੱਚ ਲੰਮਾ ਸੁੱਕਾ ਵਕਫ਼ਾ (<10 ਮਿਲੀਮੀਟਰ ਮੀਂਹ) ਰਹਿਣ ਦਾ ਅਨੁਮਾਨ ਹੈ।';
+    }
+    if (text.includes('Forecast Rain: 72.8 mm')) {
+      return 'ਪੂਰਵ-ਅਨੁਮਾਨ ਮੀਂਹ: 72.8 ਮਿਲੀਮੀਟਰ / 24 ਘੰਟੇ (≥ 64.5 ਮਿਲੀਮੀਟਰ)';
+    }
+    if (text.includes('Monsoon Break Risk: HIGH')) {
+      return 'ਮਾਨਸੂਨ ਬ੍ਰੇਕ ਖ਼ਤਰਾ: ਉੱਚ (<10 ਮਿਲੀਮੀਟਰ / 7 ਦਿਨ)';
+    }
+    if (text.includes('Take precautionary field measures immediately')) {
+      return 'ਤੁਰੰਤ ਖੇਤ ਵਿੱਚ ਸਾਵਧਾਨੀ ਦੇ ਕਦਮ ਚੁੱਕੋ।';
+    }
+
+    // ICAR Rules Decisions (Punjabi)
+    if (text.includes('Skip irrigation; rain expected. Recheck after rain')) {
+      return 'ਸਿੰਚਾਈ ਰੋਕੋ; ਮੀਂਹ ਦੀ ਸੰਭਾਵਨਾ ਹੈ। ਮੀਂਹ ਤੋਂ ਬਾਅਦ ਮੁੜ ਜਾਂਚ ਕਰੋ।';
+    }
+    if (text.includes('Reduce irrigation by half and recheck soil moisture')) {
+      return 'ਸਿੰਚਾਈ ਅੱਧੀ ਕਰ ਦਿਓ ਅਤੇ ਜ਼ਮੀਨ ਦੀ ਨਮੀ ਦੁਬਾਰਾ ਪਰਖੋ।';
+    }
+    if (text.includes('Irrigate as per crop stage; soil likely drying')) {
+      return 'ਫ਼ਸਲ ਦੇ ਪੜਾਅ ਮੁਤਾਬਕ ਸਿੰਚਾਈ ਕਰੋ; ਜ਼ਮੀਨ ਸੁੱਕ ਰਹੀ ਹੈ।';
+    }
+    if (text.includes('Do NOT spray (wind drift)')) {
+      return 'ਛਿੜਕਾਅ ਨਾ ਕਰੋ (ਤੇਜ਼ ਹਵਾ ਨਾਲ ਦਵਾਈ ਉੱਡਣ ਦਾ ਖ਼ਤਰਾ)।';
+    }
+    if (text.includes('Do NOT spray; rain will wash off')) {
+      return 'ਛਿੜਕਾਅ ਨਾ ਕਰੋ; ਮੀਂਹ ਨਾਲ ਦਵਾਈ ਵਹਿ ਜਾਵੇਗੀ।';
+    }
+    if (text.includes('Safe window: next 24-36h')) {
+      return 'ਸੁਰੱਖਿਅਤ ਸਮਾਂ: ਅਗਲੇ 24-36 ਘੰਟੇ ਛਿੜਕਾਅ ਲਈ ਢੁਕਵੇਂ ਹਨ।';
+    }
+    if (text.includes('Harvest early / cover produce')) {
+      return 'ਜਲਦੀ ਵਾਢੀ ਕਰੋ / ਕੱਟੀ ਫ਼ਸਲ ਨੂੰ ਤਰਪਾਲ ਨਾਲ ਢੱਕੋ।';
+    }
+    if (text.includes('Favorable for harvest')) {
+      return 'ਵਾਢੀ ਅਤੇ ਸੁਕਾਉਣ ਲਈ ਅਨੁਕੂਲ ਮੌਸਮ।';
+    }
+    if (text.includes('Hold fertilizer; rain will leach nutrients')) {
+      return 'ਖਾਦ ਪਾਉਣੀ ਰੋਕੋ; ਮੀਂਹ ਨਾਲ ਖੁਰਾਕੀ ਤੱਤ ਜ਼ਮੀਨ ਵਿੱਚ ਰੁੜ੍ਹ ਜਾਣਗੇ।';
+    }
+    if (text.includes('Top-dress on schedule')) {
+      return 'ਸਮਾਂ-ਸਾਰਣੀ ਅਨੁਸਾਰ ਯੂਰੀਆ/ਖਾਦ ਦੀ ਟਾਪ-ਡਰੈੱਸਿੰਗ ਕਰੋ।';
+    }
+    if (text.includes('Rule-based ICAR advisory, not expert instruction')) {
+      return 'ਨਿਯਮ-ਅਧਾਰਿਤ ICAR ਸਲਾਹ, ਮਾਹਿਰ ਹਦਾਇਤ ਨਹੀਂ।';
+    }
+
+    // Next Rain Indicators (Punjabi)
+    if (text.includes('Rain likely within 24h')) {
+      return '24 ਘੰਟਿਆਂ ਵਿੱਚ ਮੀਂਹ ਦੀ ਸੰਭਾਵਨਾ';
+    }
+    if (text.includes('Rain expected within 48h')) {
+      return '48 ਘੰਟਿਆਂ ਵਿੱਚ ਮੀਂਹ ਸੰਭਾਵਿਤ';
+    }
+    if (text.includes('None in next 48h')) {
+      return 'ਅਗਲੇ 48 ਘੰਟਿਆਂ ਵਿੱਚ ਮੀਂਹ ਨਹੀਂ';
+    }
+
+    // Monsoon Presets Advisory (Punjabi)
+    if (text.includes('Onset approaching with substantial pre-monsoon showers')) {
+      return 'ਮਾਨਸੂਨ ਆਮਦ ਨੇੜੇ ਹੈ ਅਤੇ ਚੰਗਾ ਪ੍ਰੀ-ਮਾਨਸੂਨ ਮੀਂਹ (~45 ਮਿਲੀਮੀਟਰ) ਪੈਣ ਦੀ ਸੰਭਾਵਨਾ ਹੈ। ਵੱਟਬੰਦੀ ਪੂਰੀ ਕਰੋ ਅਤੇ ਸਮੇਂ ਸਿਰ ਬਿਜਾਈ ਲਈ ਪ੍ਰਮਾਣਿਤ ਬੀਜ ਦਾ ਪ੍ਰਬੰਧ ਕਰੋ।';
+    }
+    if (text.includes('Reduce or pause irrigation as pre-monsoon wetting begins')) {
+      return 'ਸਿੰਚਾਈ ਘਟਾਓ ਜਾਂ ਰੋਕੋ ਕਿਉਂਕਿ ਪਿੰਡ ਦੇ ਖੇਤਰ ਵਿੱਚ ਪ੍ਰੀ-ਮਾਨਸੂਨ ਨਮੀ ਸ਼ੁਰੂ ਹੋ ਚੁੱਕੀ ਹੈ।';
+    }
+    if (text.includes('Monsoon declared active. Soil moisture profile optimal')) {
+      return 'ਮਾਨਸੂਨ ਸਰਗਰਮ ਐਲਾਨਿਆ ਗਿਆ। ਜ਼ਮੀਨ ਵਿੱਚ ਨਮੀ ਅਨੁਕੂਲ ਹੈ। ਬਲਾਕ ਸ਼ਡਿਊਲ ਅਨੁਸਾਰ ਸਾਉਣੀ ਫ਼ਸਲਾਂ ਦੀ ਬਿਜਾਈ ਅੱਗੇ ਵਧਾਓ।';
+    }
+    if (text.includes('Maintain regular irrigation intervals as needed; supplement with tube-well')) {
+      return 'ਲੋੜ ਅਨੁਸਾਰ ਨਿਯਮਿਤ ਸਿੰਚਾਈ ਜਾਰੀ ਰੱਖੋ; ਸੁੱਕੇ ਵਕਫ਼ਿਆਂ ਦੌਰਾਨ ਟਿਊਬਵੈੱਲ ਦਾ ਸਹਾਰਾ ਲਓ।';
+    }
+    if (text.includes('Monsoon active but extended dry break spell')) {
+      return 'ਮਾਨਸੂਨ ਸਰਗਰਮ ਹੈ ਪਰ ਲੰਮਾ ਸੁੱਕਾ ਵਕਫ਼ਾ (<10 ਮਿਲੀਮੀਟਰ ਮੀਂਹ / 7 ਦਿਨ) ਦੇਖਿਆ ਗਿਆ। ਨਵੀਂ ਪਨੀਰੀ ਲਾਉਣੀ ਰੋਕੋ ਅਤੇ ਨਮੀ ਬਚਾਓ।';
+    }
+    if (text.includes('Hold sowing until cumulative rain reaches at least 40 mm')) {
+      return 'ਬਿਜਾਈ ਉਦੋਂ ਤੱਕ ਰੋਕੋ ਜਦੋਂ ਤੱਕ 5 ਦਿਨਾਂ ਵਿੱਚ ਕੁੱਲ ਮੀਂਹ 40 ਮਿਲੀਮੀਟਰ ਨਾ ਹੋ ਜਾਵੇ। ਬੀਜ ਪਾਉਣ ਤੋਂ ਪਹਿਲਾਂ ਰੋਜ਼ਾਨਾ ਮੀਂਹ \'ਤੇ ਨਜ਼ਰ ਰੱਖੋ।';
+    }
+    if (text.includes('Continue irrigation as needed. Supplement with available water storage')) {
+      return 'ਲੋੜ ਅਨੁਸਾਰ ਸਿੰਚਾਈ ਜਾਰੀ ਰੱਖੋ। ਸੁੱਕੇ ਵਕਫ਼ਿਆਂ ਦੌਰਾਨ ਉਪਲਬਧ ਪਾਣੀ ਦੇ ਭੰਡਾਰ ਦੀ ਵਰਤੋਂ ਕਰੋ।';
+    }
+
+    // Confidence Basis Items (Punjabi)
+    if (text.includes('Detected onset within ±7 days of climatological normal')) {
+      return 'ਜਲਵਾਯੂ ਆਮ ਮਿਤੀ ਦੇ ±7 ਦਿਨਾਂ ਦੇ ਅੰਦਰ ਮਾਨਸੂਨ ਆਮਦ (+20)';
+    }
+    if (text.includes('NWP forecast agreement with seasonal timing')) {
+      return 'ਮੌਸਮੀ ਸਮੇਂ ਨਾਲ ਮੌਸਮ ਮਾਡਲ ਦੀ ਸਹਿਮਤੀ (+20)';
+    }
+    if (text.includes('Pre-monsoon trough advancing northwestward')) {
+      return 'ਪ੍ਰੀ-ਮਾਨਸੂਨ ਟਰੱਫ ਉੱਤਰ-ਪੱਛਮ ਵੱਲ ਵੱਧ ਰਿਹਾ ਹੈ (+25)';
+    }
+    if (text.includes('Convective precipitation cluster within 150 km radius')) {
+      return '150 ਕਿਮੀ ਦੇ ਘੇਰੇ ਵਿੱਚ ਬੱਦਲਾਂ ਦਾ ਸਮੂਹ ਮੀਂਹ ਪਾ ਰਿਹਾ ਹੈ (+25)';
+    }
+    if (text.includes('Multi-model ensemble signals onset within 7-day window')) {
+      return 'ਮਲਟੀ-ਮਾਡਲ ਪੂਰਵ-ਅਨੁਮਾਨ ਅਗਲੇ 7 ਦਿਨਾਂ ਵਿੱਚ ਆਮਦ ਦਾ ਸੰਕੇਤ ਦੇ ਰਿਹਾ ਹੈ (+22)';
+    }
+    if (text.includes('Pai et al. threshold met: 5-day rain cumulative > 40 mm')) {
+      return 'ਪਾਈ ਆਦਿ ਮਾਪਦੰਡ ਪੂਰੇ: 5 ਦਿਨਾਂ ਵਿੱਚ ਕੁੱਲ ਮੀਂਹ > 40 ਮਿਲੀਮੀਟਰ (+35)';
+    }
+    if (text.includes('Westerlies depth established up to 500 hPa')) {
+      return '500 hPa ਤੱਕ ਮਾਨਸੂਨੀ ਪੱਛਮੀ ਹਵਾਵਾਂ ਦਾ ਵਹਾਅ ਸਥਾਪਿਤ (+30)';
+    }
+    if (text.includes('Surface relative humidity sustained above 70%')) {
+      return 'ਜ਼ਮੀਨ \'ਤੇ ਨਮੀ ਦੀ ਮਾਤਰਾ ਲਗਾਤਾਰ 70% ਤੋਂ ਵੱਧ (+20)';
+    }
+    if (text.includes('Monsoon trough shifted north toward Himalayan foothills')) {
+      return 'ਮਾਨਸੂਨ ਟਰੱਫ ਉੱਤਰ ਵੱਲ ਹਿਮਾਲੀਅਨ ਤਲਹਟੀ ਵੱਲ ਖਿਸਕ ਗਿਆ ਹੈ (+35)';
+    }
+    if (text.includes('7-day rainfall forecast collapses below 10 mm threshold')) {
+      return 'ਅਗਲੇ 7 ਦਿਨਾਂ ਦਾ ਮੀਂਹ ਪੂਰਵ-ਅਨੁਮਾਨ 10 ਮਿਲੀਮੀਟਰ ਤੋਂ ਘੱਟ ਗਿਆ ਹੈ (+35)';
+    }
+    if (text.includes('Mid-tropospheric anticyclone encroaching Northwest India')) {
+      return 'ਮੱਧ-ਵਾਯੂਮੰਡਲੀ ਐਂਟੀਸਾਈਕਲੋਨ ਉੱਤਰ-ਪੱਛਮ ਭਾਰਤ \'ਤੇ ਸਰਗਰਮ (+18)';
+    }
+
+    // Agronomic Crop Guidance Notes (Punjabi)
+    if (text.includes('Crown Root Initiation (CRI at 21 days)')) {
+      return 'ਜੜ੍ਹ ਫੁੱਟਣ (21 ਦਿਨਾਂ \'ਤੇ CRI) ਅਤੇ ਫੋਟ ਕਰਨ ਵੇਲੇ ਨਮੀ ਬਹੁਤ ਜ਼ਰੂਰੀ ਹੈ। ਖੇਤਾਂ ਵਿੱਚ ਪਾਣੀ ਖੜ੍ਹਾ ਨਾ ਹੋਣ ਦਿਓ।';
+    }
+    if (text.includes('Target broadleaf weedicide (2,4-D)')) {
+      return 'ਚੌੜੇ ਪੱਤੇ ਵਾਲੇ ਨਦੀਨਨਾਸ਼ਕ ਜਾਂ ਪੀਲੀ ਕੁੰਗੀ ਲਈ ਉੱਲੀਨਾਸ਼ਕ ਦਾ ਛਿੜਕਾਅ ਕਰੋ। ਪੱਤੇ ਸੁੱਕੇ ਹੋਣੇ ਚਾਹੀਦੇ ਹਨ।';
+    }
+    if (text.includes('Ensure grain moisture is below 12%')) {
+      return 'ਭੰਡਾਰਨ ਤੋਂ ਪਹਿਲਾਂ ਦਾਣਿਆਂ ਵਿੱਚ ਨਮੀ 12% ਤੋਂ ਘੱਟ ਹੋਣੀ ਯਕੀਨੀ ਬਣਾਓ ਤਾਂ ਜੋ ਸੁੰਡੀ ਅਤੇ ਉੱਲੀ ਤੋਂ ਬਚਾਅ ਰਹੇ।';
+    }
+    if (text.includes('Apply 2nd split of Urea (65 kg/acre)')) {
+      return 'ਸਿੰਚਾਈ ਤੋਂ ਪਹਿਲਾਂ ਯੂਰੀਆ ਦੀ ਦੂਜੀ ਕਿਸ਼ਤ (65 ਕਿਲੋ/ਏਕੜ) ਪਾਓ। ਸਿੱਲ੍ਹੀ ਜ਼ਮੀਨ ਵਿੱਚ ਨਾਈਟ੍ਰੋਜਨ ਵਧੀਆ ਅਸਰ ਕਰਦੀ ਹੈ।';
+    }
+    if (text.includes('Maintain 2–5 cm standing water during active vegetative')) {
+      return 'ਫ਼ਸਲ ਦੇ ਵਾਧੇ ਸਮੇਂ ਖੇਤ ਵਿੱਚ 2–5 ਸੈਂਟੀਮੀਟਰ ਪਾਣੀ ਬਣਾ ਕੇ ਰੱਖੋ। ਵਾਢੀ ਤੋਂ ਪਹਿਲਾਂ ਵਾਧੂ ਪਾਣੀ ਕੱਢ ਦਿਓ।';
+    }
+    if (text.includes('Target stem borer or blast treatment')) {
+      return 'ਤਣਾ ਛੇਦਕ ਜਾਂ ਝੁਲਸ ਰੋਗ ਦੇ ਇਲਾਜ ਲਈ ਛਿੜਕਾਅ ਕਰੋ; ਦਵਾਈ ਚਿਪਕਣ ਲਈ ਘੱਟੋ-ਘੱਟ 4–6 ਘੰਟੇ ਮੀਂਹ ਨਾ ਪਵੇ।';
+    }
+    if (text.includes('Drain field 10–14 days prior to harvest')) {
+      return 'ਵਾਢੀ ਤੋਂ 10–14 ਦਿਨ ਪਹਿਲਾਂ ਖੇਤ ਸੁਕਾਓ। ਧੁੱਪੇ ਸੁੱਕ ਰਹੀ ਝੋਨੇ ਦੀ ਫ਼ਸਲ ਨੂੰ ਤਰੇਲ ਅਤੇ ਸਿੱਲ੍ਹ ਤੋਂ ਬਚਾਓ।';
+    }
+    if (text.includes('Apply nitrogen in 3 equal splits')) {
+      return 'ਯੂਰੀਆ 3 ਬਰਾਬਰ ਕਿਸ਼ਤਾਂ ਵਿੱਚ ਪਾਓ: ਬਿਜਾਈ ਵੇਲੇ, ਫੋਟ ਵੇਲੇ ਅਤੇ ਗੋਭ ਵੇਲੇ। ਵਗਦੇ ਪਾਣੀ ਵਿੱਚ ਖਾਦ ਨਾ ਪਾਓ।';
+    }
+    if (text.includes('Maize is highly sensitive to waterlogging')) {
+      return 'ਮੱਕੀ ਪਾਣੀ ਖੜ੍ਹਨ ਪ੍ਰਤੀ ਬਹੁਤ ਸੰਵੇਦਨਸ਼ੀਲ ਹੈ। ਨਿਕਾਸੀ ਨਾਲੀਆਂ ਸਾਫ਼ ਰੱਖੋ; ਛੱਲੀ ਬਣਨ ਵੇਲੇ ਸਿਆੜਾਂ ਵਿੱਚ ਸਿੰਚਾਈ ਕਰੋ।';
+    }
+    if (text.includes('Direct spray into leaf whorls for Fall Armyworm')) {
+      return 'ਫਾਲ ਆਰਮੀਵਰਮ ਦੀ ਰੋਕਥਾਮ ਲਈ ਸ਼ਾਂਤ ਹਵਾ (<12 ਕਿਮੀ/ਘੰਟਾ) ਵਿੱਚ ਪੌਦੇ ਦੇ ਗੋਭੇ ਅੰਦਰ ਸਿੱਧਾ ਛਿੜਕਾਅ ਕਰੋ।';
+    }
+    if (text.includes('Harvest cobs when outer husk turns dry parchment brown')) {
+      return 'ਜਦੋਂ ਬਾਹਰਲਾ ਛਿਲਕਾ ਸੁੱਕ ਕੇ ਭੂਰਾ ਹੋ ਜਾਵੇ ਤਾਂ ਛੱਲੀਆਂ ਤੋੜੋ। ਉੱਲੀ ਤੋਂ ਬਚਾਅ ਲਈ ਛੱਲੀਆਂ ਨੂੰ ਧੁੱਪੇ ਸੁਕਾਓ।';
+    }
+    if (text.includes('Side-dress Urea (40 kg/acre) at knee-high stage')) {
+      return 'ਗੋਡੇ-ਗੋਡੇ ਫ਼ਸਲ ਹੋਣ (V6) \'ਤੇ ਕਤਾਰਾਂ ਵਿੱਚ ਯੂਰੀਆ (40 ਕਿਲੋ/ਏਕੜ) ਪਾਓ ਅਤੇ ਡਿੱਗਣ ਤੋਂ ਬਚਾਉਣ ਲਈ ਮਿੱਟੀ ਚੜ੍ਹਾਓ।';
     }
   }
 

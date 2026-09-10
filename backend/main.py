@@ -245,12 +245,14 @@ async def get_alerts(village_id: str, lang: Optional[str] = "en"):
 
 @app.post("/alerts/{village_id}/inject")
 @app.post("/api/alerts/{village_id}/inject")
-async def inject_demo_alert(village_id: str):
-    """Injects a synthetic Heavy Rain event for judges to preview live alert triggers."""
-    return AlertAgent.inject_demo_alert(village_id)
+async def inject_demo_alert(village_id: str, alert_type: Optional[str] = "HEAVY RAIN"):
+    """Injects a synthetic Heavy Rain or Break Risk event for judges to preview live alert triggers."""
+    return AlertAgent.inject_demo_alert(village_id, alert_type=alert_type or "HEAVY RAIN")
 
 @app.post("/alerts/{village_id}/clear")
 @app.post("/api/alerts/{village_id}/clear")
+@app.delete("/alerts/{village_id}/clear")
+@app.delete("/api/alerts/{village_id}/clear")
 async def clear_demo_alerts(village_id: str):
     """Clears injected synthetic demo alerts for the village."""
     AlertAgent.clear_demo_alerts(village_id)

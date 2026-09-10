@@ -13,7 +13,9 @@ export default function Advisory() {
     setIsLocationModalOpen,
     t,
     getCropLabel,
-    getVillageLabel
+    getVillageLabel,
+    getStatusLabel,
+    translateText
   } = useWeather();
 
   const villageName = selectedVillage?.name || 'Khanna';
@@ -170,7 +172,7 @@ export default function Advisory() {
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '3px 10px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', marginBottom: '6px' }}>
             <Sprout size={14} color="#34d399" />
             <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#34d399', letterSpacing: '0.04em' }}>
-              ICAR-STYLE AGRONOMIC THRESHOLDS
+              {t('icarStyleThresholds') || 'ICAR-STYLE AGRONOMIC THRESHOLDS'}
             </span>
           </div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', margin: 0 }}>
@@ -197,18 +199,18 @@ export default function Advisory() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Info size={16} color="#fbbf24" />
           <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#fef3c7', letterSpacing: '0.01em' }}>
-            {advisory?.honest_label || "Rule-based ICAR advisory, not expert instruction."}
+            {translateText(advisory?.honest_label) || t('honestLabel') || "Rule-based ICAR advisory, not expert instruction."}
           </span>
         </div>
         <span style={{ fontSize: '0.74rem', color: '#fde68a' }}>
-          Telemetry: Open-Meteo NWP Forecast
+          {t('telemetryOpenMeteo') || 'Telemetry: Open-Meteo NWP Forecast'}
         </span>
       </div>
 
       {/* Crop Selector Tabs (Wheat, Paddy, Maize) */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <div style={{ fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', fontWeight: 700 }}>
-          Select Active Farm Crop:
+          {t('selectActiveFarmCrop') || 'Select Active Farm Crop:'}
         </div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           {crops.map((c) => {
@@ -238,7 +240,7 @@ export default function Advisory() {
                 <span>{getCropLabel(c)}</span>
                 {isSelected && (
                   <span style={{ fontSize: '0.68rem', padding: '1px 6px', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.25)', color: '#a7f3d0' }}>
-                    Active
+                    {getStatusLabel('ACTIVE')}
                   </span>
                 )}
               </button>
@@ -259,7 +261,7 @@ export default function Advisory() {
                 <span>{t('irrigationStrategy')}</span>
               </div>
               <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
-                7d Rain: {forecast7dRain} mm
+                {t('rain7dLabel') || '7d Rain:'} {forecast7dRain} mm
               </span>
             </div>
 
@@ -277,17 +279,17 @@ export default function Advisory() {
                 marginBottom: '12px'
               }}
             >
-              {advisory?.irrigation?.decision || irrigationDecision}
+              {translateText(advisory?.irrigation?.decision || irrigationDecision)}
             </div>
 
             {/* Agronomic Detail */}
             <p style={{ margin: 0, fontSize: '0.84rem', color: '#cbd5e1', lineHeight: 1.5 }}>
-              {cropNotes.irrigation}
+              {translateText(cropNotes.irrigation)}
             </p>
           </div>
 
           <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)', paddingTop: '10px' }}>
-            Rule: ≥15 mm (Skip) · 5–15 mm (Halve) · &lt;5 mm (Irrigate)
+            {t('ruleIrrigation') || 'Rule: ≥15 mm (Skip) · 5–15 mm (Halve) · <5 mm (Irrigate)'}
           </div>
         </div>
 
@@ -301,7 +303,7 @@ export default function Advisory() {
               </div>
               <div style={{ display: 'flex', gap: '6px' }}>
                 <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', background: windSpeed > 12 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.15)', color: windSpeed > 12 ? '#f87171' : '#34d399', border: `1px solid ${windSpeed > 12 ? 'rgba(239, 68, 68, 0.4)' : 'rgba(16, 185, 129, 0.3)'}` }}>
-                  Wind: {windSpeed} km/h
+                  {t('windLabel') || 'Wind:'} {windSpeed} km/h
                 </span>
               </div>
             </div>
@@ -320,22 +322,22 @@ export default function Advisory() {
                 marginBottom: '10px'
               }}
             >
-              {advisory?.spraying?.decision || sprayingDecision}
+              {translateText(advisory?.spraying?.decision || sprayingDecision)}
             </div>
 
             {/* Next Rain Indicator */}
             <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: '8px' }}>
-              Next Rain Outlook: <strong style={{ color: rainWithin24h ? '#f87171' : '#fff' }}>{nextRainDesc}</strong>
+              {t('nextRainOutlook') || 'Next Rain Outlook:'} <strong style={{ color: rainWithin24h ? '#f87171' : '#fff' }}>{translateText(nextRainDesc)}</strong>
             </div>
 
             {/* Agronomic Detail */}
             <p style={{ margin: 0, fontSize: '0.84rem', color: '#cbd5e1', lineHeight: 1.5 }}>
-              {cropNotes.spraying}
+              {translateText(cropNotes.spraying)}
             </p>
           </div>
 
           <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)', paddingTop: '10px' }}>
-            Rule: Wind &gt;12 km/h or Rain &lt;24h → Do NOT spray
+            {t('ruleSpraying') || 'Rule: Wind >12 km/h or Rain <24h → Do NOT spray'}
           </div>
         </div>
 
@@ -348,7 +350,7 @@ export default function Advisory() {
                 <span>{t('harvestingStorage')}</span>
               </div>
               <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', background: rainWithin48h ? 'rgba(245, 158, 11, 0.2)' : 'rgba(16, 185, 129, 0.15)', color: rainWithin48h ? '#fbbf24' : '#34d399', border: `1px solid ${rainWithin48h ? 'rgba(245, 158, 11, 0.4)' : 'rgba(16, 185, 129, 0.3)'}` }}>
-                48h Rain Risk: {rainWithin48h ? 'Likely' : 'Low'}
+                {t('risk48hRain') || '48h Rain Risk:'} {getStatusLabel(rainWithin48h ? 'Likely' : 'Low')}
               </span>
             </div>
 
@@ -366,17 +368,17 @@ export default function Advisory() {
                 marginBottom: '12px'
               }}
             >
-              {advisory?.harvesting?.decision || harvestingDecision}
+              {translateText(advisory?.harvesting?.decision || harvestingDecision)}
             </div>
 
             {/* Agronomic Detail */}
             <p style={{ margin: 0, fontSize: '0.84rem', color: '#cbd5e1', lineHeight: 1.5 }}>
-              {cropNotes.harvesting}
+              {translateText(cropNotes.harvesting)}
             </p>
           </div>
 
           <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)', paddingTop: '10px' }}>
-            Rule: Rain within 48h → Harvest early / cover produce
+            {t('ruleHarvesting') || 'Rule: Rain within 48h → Harvest early / cover produce'}
           </div>
         </div>
 
@@ -389,7 +391,7 @@ export default function Advisory() {
                 <span>{t('nutrientManagement')}</span>
               </div>
               <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', background: rainWithin24h ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.15)', color: rainWithin24h ? '#f87171' : '#34d399', border: `1px solid ${rainWithin24h ? 'rgba(239, 68, 68, 0.4)' : 'rgba(16, 185, 129, 0.3)'}` }}>
-                24h Leaching: {rainWithin24h ? 'High Risk' : 'Safe Window'}
+                {t('leaching24h') || '24h Leaching:'} {getStatusLabel(rainWithin24h ? 'High Risk' : 'Safe Window')}
               </span>
             </div>
 
@@ -407,17 +409,17 @@ export default function Advisory() {
                 marginBottom: '12px'
               }}
             >
-              {advisory?.fertilizer?.decision || fertilizerDecision}
+              {translateText(advisory?.fertilizer?.decision || fertilizerDecision)}
             </div>
 
             {/* Agronomic Detail */}
             <p style={{ margin: 0, fontSize: '0.84rem', color: '#cbd5e1', lineHeight: 1.5 }}>
-              {cropNotes.fertilizer}
+              {translateText(cropNotes.fertilizer)}
             </p>
           </div>
 
           <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)', paddingTop: '10px' }}>
-            Rule: Rain within 24h → Hold fertilizer (prevents leaching)
+            {t('ruleFertilizer') || 'Rule: Rain within 24h → Hold fertilizer (prevents leaching)'}
           </div>
         </div>
 
@@ -437,7 +439,7 @@ export default function Advisory() {
           lineHeight: 1.5,
         }}
       >
-        <span style={{ color: '#fbbf24', fontWeight: 600 }}>Honest Transparency:</span> {advisory?.honest_label || "Rule-based ICAR advisory, not expert instruction."} · Meteorological parameters sourced from Open-Meteo NWP forecast.
+        <span style={{ color: '#fbbf24', fontWeight: 600 }}>{t('honestTransparency') || 'Honest Transparency:'}</span> {translateText(advisory?.honest_label) || t('honestLabel') || "Rule-based ICAR advisory, not expert instruction."} · {t('telemetrySourceFooter') || 'Meteorological parameters sourced from Open-Meteo NWP forecast.'}
       </footer>
     </div>
   );

@@ -37,7 +37,7 @@ export default function Dashboard({ onInspectObservation }) {
     return (
       <div style={{ padding: '60px 28px', textAlign: 'center', color: 'var(--text-secondary)' }}>
         <div className="pulse-dot live" style={{ width: '16px', height: '16px', marginBottom: '16px' }}></div>
-        <h3>{t('connecting')}</h3>
+        <h3>{t('syncingTelemetry') || 'Syncing atmospheric telemetry...'}</h3>
       </div>
     );
   }
