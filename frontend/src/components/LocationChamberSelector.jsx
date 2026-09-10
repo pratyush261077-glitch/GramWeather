@@ -34,7 +34,7 @@ export default function LocationChamberSelector() {
       <div className="chamber-unit chamber-unit-state">
         <span className="chamber-unit-badge">
           <span className="chamber-num">1</span>
-          <span className="chamber-title">{t('chamberState')}</span>
+          <span className="chamber-title-text">{t('chamberState')}</span>
         </span>
         <select
           className="chamber-select"
@@ -56,7 +56,7 @@ export default function LocationChamberSelector() {
       <div className="chamber-unit chamber-unit-block">
         <span className="chamber-unit-badge">
           <span className="chamber-num">2</span>
-          <span className="chamber-title">{t('chamberBlock')}</span>
+          <span className="chamber-title-text">{t('chamberBlock')}</span>
         </span>
         <select
           className="chamber-select"
@@ -78,7 +78,7 @@ export default function LocationChamberSelector() {
       <div className="chamber-unit chamber-unit-village active-chamber">
         <span className="chamber-unit-badge active">
           <span className="chamber-num">3</span>
-          <span className="chamber-title">{t('chamberVillage')}</span>
+          <span className="chamber-title-text">{t('chamberVillage')}</span>
         </span>
         <select
           className="chamber-select chamber-select-village"
