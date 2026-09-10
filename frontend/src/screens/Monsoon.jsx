@@ -1,16 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useWeather } from '../context/WeatherContext';
 import { fetchMonsoonOutlook, fetchMonsoonBacktest } from '../services/monsoonAPI';
-import { CloudRain, Droplets, Sprout, ShieldCheck, AlertTriangle, RefreshCw, Info, MapPin } from '../components/icons';
+import { CloudRain, Droplets, Sprout, ShieldCheck, AlertTriangle, RefreshCw, Info, MapPin, ChevronDown, ChevronUp, Copy, Check } from '../components/icons';
 import TransparencyBadge from '../components/TransparencyBadge';
 
 export default function Monsoon() {
-  const { selectedVillage, setIsLocationModalOpen, t, getVillageLabel, getCropLabel } = useWeather();
+  const {
+    selectedVillage,
+    setIsLocationModalOpen,
+    t,
+    getVillageLabel,
+    getCropLabel,
+    isLowBandwidthMode,
+    simulateNetworkDrop,
+    lastCacheTime
+  } = useWeather();
   const [outlook, setOutlook] = useState(null);
   const [backtest, setBacktest] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showBacktest, setShowBacktest] = useState(false);
   const [loadingBacktest, setLoadingBacktest] = useState(false);
+  const [copiedDeck, setCopiedDeck] = useState(false);
+  const [isMonsoonCached, setIsMonsoonCached] = useState(false);
 
   const villageId = selectedVillage?.id || 'khanna';
   const villageName = selectedVillage?.name || 'Khanna';
@@ -21,21 +32,72 @@ export default function Monsoon() {
     let isMounted = true;
     async function loadData() {
       setLoading(true);
-      setBacktest(null); // Reset backtest cache on village switch
+      const cacheKeyOutlook = `gw_monsoon_${villageId}`;
+      const cacheKeyBacktest = `gw_monsoon_backtest_${villageId}`;
+
+      if (simulateNetworkDrop) {
+        try {
+          const cOutlook = localStorage.getItem(cacheKeyOutlook);
+          const cBacktest = localStorage.getItem(cacheKeyBacktest);
+          if (cOutlook && isMounted) {
+            setOutlook(JSON.parse(cOutlook));
+            setIsMonsoonCached(true);
+          }
+          if (cBacktest && isMounted) {
+            setBacktest(JSON.parse(cBacktest));
+          }
+        } catch (e) {
+          console.warn('Cache read error:', e);
+        } finally {
+          if (isMounted) setLoading(false);
+        }
+        return;
+      }
+
       try {
-        const data = await fetchMonsoonOutlook(villageId);
+        const [outlookRes, backtestRes] = await Promise.allSettled([
+          fetchMonsoonOutlook(villageId),
+          fetchMonsoonBacktest(villageId),
+        ]);
         if (isMounted) {
-          setOutlook(data);
+          if (outlookRes.status === 'fulfilled' && outlookRes.value) {
+            setOutlook(outlookRes.value);
+            setIsMonsoonCached(false);
+            try {
+              localStorage.setItem(cacheKeyOutlook, JSON.stringify(outlookRes.value));
+            } catch {}
+          } else {
+            const cOutlook = localStorage.getItem(cacheKeyOutlook);
+            if (cOutlook) {
+              setOutlook(JSON.parse(cOutlook));
+              setIsMonsoonCached(true);
+            }
+          }
+
+          if (backtestRes.status === 'fulfilled' && backtestRes.value) {
+            setBacktest(backtestRes.value);
+            try {
+              localStorage.setItem(cacheKeyBacktest, JSON.stringify(backtestRes.value));
+            } catch {}
+          } else {
+            const cBacktest = localStorage.getItem(cacheKeyBacktest);
+            if (cBacktest) setBacktest(JSON.parse(cBacktest));
+          }
         }
       } catch (err) {
-        console.error('Failed to load monsoon outlook:', err);
+        console.error('Failed to load monsoon data, falling back to cache:', err);
+        const cOutlook = localStorage.getItem(cacheKeyOutlook);
+        if (cOutlook && isMounted) {
+          setOutlook(JSON.parse(cOutlook));
+          setIsMonsoonCached(true);
+        }
       } finally {
         if (isMounted) setLoading(false);
       }
     }
     loadData();
     return () => { isMounted = false; };
-  }, [villageId]);
+  }, [villageId, simulateNetworkDrop]);
 
   const handleToggleBacktest = async () => {
     if (!showBacktest && !backtest) {
@@ -49,7 +111,7 @@ export default function Monsoon() {
         setLoadingBacktest(false);
       }
     }
-    setShowBacktest(!showBacktest);
+    setShowBacktest((prev) => !prev);
   };
 
   const getStatusBadge = (status) => {
@@ -135,6 +197,23 @@ export default function Monsoon() {
             <span className="chamber-badge" style={{ background: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.4)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 700 }}>
               3. {t('chamberVillage')}: <strong>{getVillageLabel(villageName)}</strong>
             </span>
+
+            {isMonsoonCached && (
+              <span
+                style={{
+                  background: 'rgba(245, 158, 11, 0.25)',
+                  border: '1px solid rgba(245, 158, 11, 0.5)',
+                  color: '#fbbf24',
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  letterSpacing: '0.04em',
+                }}
+              >
+                📦 {t('cachedBadge') || 'CACHED'}
+              </span>
+            )}
           </div>
 
           <h1 className="village-name">{getVillageLabel(villageName)}</h1>
@@ -384,92 +463,382 @@ export default function Monsoon() {
 
       </div>
 
-      {/* CARD 5: 4-Year Backtest Validation Table (Collapsible) */}
-      <div className="glass-panel" style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Info size={16} color="#10b981" />
-          <span>
-            <strong>Historical Validation:</strong> 4-Year Onset Backtest on Open-Meteo ERA5 Reanalysis.
-          </span>
-        </div>
-        <button
-          onClick={handleToggleBacktest}
-          style={{
-            background: 'rgba(16, 185, 129, 0.15)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            color: '#34d399',
-            padding: '6px 14px',
-            borderRadius: '6px',
-            fontSize: '0.76rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}
-        >
-          {loadingBacktest ? 'Loading 4-Yr Backtest...' : showBacktest ? 'Hide Historical Validation ▲' : 'View 4-Yr Backtest Validation (2023–2026) ▼'}
-        </button>
-      </div>
+      {/* CARD 5: Historical Validation Section (Collapsible) */}
+      {(() => {
+        const DEFAULT_BACKTEST_ROWS = [
+          { year: 2023, detected_onset: '2023-07-03', climatological_normal: '2023-06-28', error_days: 5, jun_aug_total_rain_mm: 426.0, error_interpretation: 'Detected onset was 5 day(s) late vs. climatological normal' },
+          { year: 2024, detected_onset: '2024-06-27', climatological_normal: '2024-06-28', error_days: -1, jun_aug_total_rain_mm: 390.4, error_interpretation: 'Detected onset was 1 day(s) early vs. climatological normal' },
+          { year: 2025, detected_onset: '2025-06-25', climatological_normal: '2025-06-28', error_days: -3, jun_aug_total_rain_mm: 547.3, error_interpretation: 'Detected onset was 3 day(s) early vs. climatological normal' },
+          { year: 2026, detected_onset: '2026-07-02', climatological_normal: '2026-06-28', error_days: 4, jun_aug_total_rain_mm: 331.4, error_interpretation: 'Detected onset was 4 day(s) late vs. climatological normal' },
+        ];
 
-      {showBacktest && (
-        <div className="glass-panel animate-fade-in" style={{ padding: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
-            <h3 style={{ margin: 0, fontSize: '1rem', color: '#fff', fontWeight: 700 }}>
-              Historical Onset Back-Test Validation ({getVillageLabel(blockName)} Block)
-            </h3>
-            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-              Method: Pai et al. (2014) on Open-Meteo ERA5 Reanalysis
-            </span>
-          </div>
+        const backtestRows = (backtest?.backtest_results && backtest.backtest_results.length > 0)
+          ? backtest.backtest_results
+          : DEFAULT_BACKTEST_ROWS;
 
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
-                  <th style={{ padding: '10px' }}>Year</th>
-                  <th style={{ padding: '10px' }}>Climatological Normal</th>
-                  <th style={{ padding: '10px' }}>Detected Onset Date</th>
-                  <th style={{ padding: '10px' }}>Error (Days)</th>
-                  <th style={{ padding: '10px' }}>Jun–Aug Total Rain</th>
-                  <th style={{ padding: '10px' }}>Interpretation</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(backtest?.backtest_results || [
-                  { year: 2023, climatological_normal: '2023-06-28', detected_onset: '2023-07-03', error_days: 5, jun_aug_total_rain_mm: 426.0, error_interpretation: 'Detected onset 5 days late vs normal' },
-                  { year: 2024, climatological_normal: '2024-06-28', detected_onset: '2024-06-27', error_days: -1, jun_aug_total_rain_mm: 390.4, error_interpretation: 'Detected onset 1 day early vs normal' },
-                  { year: 2025, climatological_normal: '2025-06-28', detected_onset: '2025-06-25', error_days: -3, jun_aug_total_rain_mm: 547.3, error_interpretation: 'Detected onset 3 days early vs normal' },
-                  { year: 2026, climatological_normal: '2026-06-28', detected_onset: '2026-07-02', error_days: 4, jun_aug_total_rain_mm: 331.4, error_interpretation: 'Detected onset 4 days late vs normal' },
-                ]).map((row) => (
-                  <tr key={row.year} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                    <td style={{ padding: '10px', fontWeight: 700, color: '#fff' }}>{row.year}</td>
-                    <td style={{ padding: '10px', color: '#94a3b8' }}>{row.climatological_normal}</td>
-                    <td style={{ padding: '10px', color: '#38bdf8', fontWeight: 600 }}>{row.detected_onset || 'Not Met'}</td>
-                    <td style={{ padding: '10px' }}>
-                      <span style={{
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        background: Math.abs(row.error_days) <= 2 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)',
-                        color: Math.abs(row.error_days) <= 2 ? '#34d399' : '#fbbf24',
-                        fontWeight: 700
-                      }}>
-                        {row.error_days > 0 ? `+${row.error_days}d` : `${row.error_days}d`}
+        const validRows = backtestRows.filter((r) => r.error_days !== null && r.error_days !== undefined);
+        const computedMae = validRows.length > 0
+          ? (validRows.reduce((sum, r) => sum + Math.abs(r.error_days), 0) / validRows.length)
+          : 3.25;
+        const maeApproxDays = Math.round(computedMae);
+        const maeLabel = backtest?.mean_absolute_error_label || `Mean onset error: ~${maeApproxDays} days (back-test, 1 block)`;
+        const caveatText = backtest?.caveat || "Single block, 4 years, approximate climatology - needs IMD gridded data at scale.";
+
+        const handleCopyDeckSummary = (e) => {
+          e.stopPropagation();
+          const tableLines = backtestRows.map(
+            (r) =>
+              `| ${r.year} | ${r.detected_onset || 'Criteria not met'} | ${r.climatological_normal} | ${
+                r.error_days > 0 ? `+${r.error_days} days (late)` : r.error_days < 0 ? `${r.error_days} days (early)` : '0 days (exact)'
+              } |`
+          );
+
+          const summaryText = [
+            `### Monsoon Onset Historical Validation (${getVillageLabel(blockName)} Block)`,
+            `Data Source: Open-Meteo ERA5 Reanalysis Archive (2023–2026)`,
+            ``,
+            `| Year | Detected Onset | Normal | Error (Days) |`,
+            `| :--- | :--- | :--- | :--- |`,
+            ...tableLines,
+            ``,
+            `**Mean Absolute Error**: ~${maeApproxDays} days (${computedMae.toFixed(2)} days exact across ${validRows.length} detected years)`,
+            `**Caveat**: ${caveatText}`,
+          ].join('\n');
+
+          if (navigator?.clipboard?.writeText) {
+            navigator.clipboard.writeText(summaryText);
+            setCopiedDeck(true);
+            setTimeout(() => setCopiedDeck(false), 2000);
+          }
+        };
+
+        return (
+          <div
+            className="glass-panel"
+            style={{
+              borderRadius: 'var(--radius-md)',
+              overflow: 'hidden',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+            }}
+          >
+            {/* Header Accordion Bar */}
+            <div
+              onClick={handleToggleBacktest}
+              style={{
+                padding: '16px 20px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '12px',
+                cursor: 'pointer',
+                background: showBacktest ? 'rgba(255, 255, 255, 0.03)' : 'transparent',
+                borderBottom: showBacktest ? '1px solid var(--border-subtle)' : 'none',
+                userSelect: 'none',
+                transition: 'background 0.2s ease',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <Info size={18} color="#10b981" />
+                <span style={{ fontWeight: 700, fontSize: '0.92rem', color: '#fff' }}>
+                  {t('validationTitle') || `Historical Onset Validation (${getVillageLabel(blockName)} Block)`}
+                </span>
+                <span
+                  style={{
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    color: '#34d399',
+                    border: '1px solid rgba(16, 185, 129, 0.35)',
+                    padding: '2px 10px',
+                    borderRadius: '12px',
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                  }}
+                >
+                  {maeLabel}
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <button
+                  type="button"
+                  style={{
+                    background: showBacktest ? 'rgba(100, 116, 139, 0.2)' : 'rgba(16, 185, 129, 0.18)',
+                    border: `1px solid ${showBacktest ? 'rgba(148, 163, 184, 0.3)' : 'rgba(16, 185, 129, 0.4)'}`,
+                    color: showBacktest ? '#cbd5e1' : '#34d399',
+                    padding: '6px 14px',
+                    borderRadius: '6px',
+                    fontSize: '0.76rem',
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {showBacktest ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                  {loadingBacktest
+                    ? 'Loading Archive Data...'
+                    : showBacktest
+                    ? (t('validationToggleCollapse') || 'Hide Historical Validation ▲')
+                    : (t('validationToggleExpand') || 'View 4-Yr Backtest Validation (2023–2026) ▼')}
+                </button>
+              </div>
+            </div>
+
+            {/* Collapsible Content */}
+            {showBacktest && (
+              <div className="animate-fade-in" style={{ padding: '20px' }}>
+                {/* Title and Copy Action */}
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '14px',
+                    marginBottom: '18px',
+                  }}
+                >
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#fff', fontWeight: 800 }}>
+                      Historical Onset Back-Test Validation ({getVillageLabel(blockName)} Block)
+                    </h3>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '0.78rem', color: '#94a3b8' }}>
+                      Computed from Open-Meteo ERA5 archive data (2023–2026) • Criteria adapted from Pai et al. (2014)
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={handleCopyDeckSummary}
+                    style={{
+                      background: copiedDeck ? 'rgba(16, 185, 129, 0.25)' : 'rgba(56, 189, 248, 0.15)',
+                      border: `1px solid ${copiedDeck ? '#10b981' : 'rgba(56, 189, 248, 0.35)'}`,
+                      color: copiedDeck ? '#34d399' : '#38bdf8',
+                      padding: '7px 14px',
+                      borderRadius: '6px',
+                      fontSize: '0.76rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    {copiedDeck ? <Check size={15} color="#34d399" /> : <Copy size={15} />}
+                    {copiedDeck ? (t('copied') || 'Copied!') : (t('btnCopyDeck') || 'Copy Summary for Deck')}
+                  </button>
+                </div>
+
+                {/* KPI Metrics */}
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                    gap: '12px',
+                    marginBottom: '18px',
+                  }}
+                >
+                  <div
+                    style={{
+                      background: 'rgba(16, 185, 129, 0.08)',
+                      border: '1px solid rgba(16, 185, 129, 0.25)',
+                      borderRadius: '8px',
+                      padding: '12px 14px',
+                    }}
+                  >
+                    <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: '#6ee7b7', fontWeight: 700 }}>
+                      Mean Absolute Error (MAE)
+                    </div>
+                    <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#10b981', marginTop: '2px' }}>
+                      ~{maeApproxDays} days{' '}
+                      <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#34d399' }}>
+                        ({computedMae.toFixed(2)}d exact)
                       </span>
-                    </td>
-                    <td style={{ padding: '10px', color: '#cbd5e1' }}>{row.jun_aug_total_rain_mm} mm</td>
-                    <td style={{ padding: '10px', color: '#94a3b8', fontSize: '0.78rem' }}>{row.error_interpretation}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                      Across {validRows.length} detected back-test years
+                    </div>
+                  </div>
 
-          <div style={{ marginTop: '14px', padding: '10px 14px', borderRadius: '8px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', fontSize: '0.75rem', color: '#fde68a' }}>
-            <strong>Validation Caveat:</strong> Block ({getVillageLabel(blockName)}), 4 years back-test, approximate IMD isochrone climatology. Mean Absolute Error: ~3.25 days.
+                  <div
+                    style={{
+                      background: 'rgba(56, 189, 248, 0.08)',
+                      border: '1px solid rgba(56, 189, 248, 0.25)',
+                      borderRadius: '8px',
+                      padding: '12px 14px',
+                    }}
+                  >
+                    <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: '#7dd3fc', fontWeight: 700 }}>
+                      Climatological Normal
+                    </div>
+                    <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#38bdf8', marginTop: '2px' }}>
+                      28 Jun{' '}
+                      <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#7dd3fc' }}>(±7d)</span>
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                      IMD isochrone approximation
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      background: 'rgba(245, 158, 11, 0.08)',
+                      border: '1px solid rgba(245, 158, 11, 0.25)',
+                      borderRadius: '8px',
+                      padding: '12px 14px',
+                    }}
+                  >
+                    <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: '#fde68a', fontWeight: 700 }}>
+                      Archive Telemetry
+                    </div>
+                    <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#fbbf24', marginTop: '2px' }}>
+                      Open-Meteo{' '}
+                      <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fde68a' }}>ERA5</span>
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                      Daily rainfall: 2023–2026 Jun–Aug
+                    </div>
+                  </div>
+                </div>
+
+                {/* Validation Table */}
+                <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+                    <thead>
+                      <tr
+                        style={{
+                          background: 'rgba(0, 0, 0, 0.35)',
+                          color: 'var(--text-secondary)',
+                          borderBottom: '1px solid var(--border-subtle)',
+                        }}
+                      >
+                        <th style={{ padding: '12px 14px', fontWeight: 700 }}>{t('colYear')}</th>
+                        <th style={{ padding: '12px 14px', fontWeight: 700 }}>{t('colDetectedOnset')}</th>
+                        <th style={{ padding: '12px 14px', fontWeight: 700 }}>{t('colNormal')}</th>
+                        <th style={{ padding: '12px 14px', fontWeight: 700 }}>{t('colErrorDays')}</th>
+                        <th style={{ padding: '12px 14px', fontWeight: 700 }}>Rain (Jun–Aug)</th>
+                        <th style={{ padding: '12px 14px', fontWeight: 700 }}>Interpretation</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {backtestRows.map((row) => (
+                        <tr key={row.year} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                          <td style={{ padding: '12px 14px', fontWeight: 800, color: '#fff', fontSize: '0.88rem' }}>
+                            {row.year}
+                          </td>
+                          <td
+                            style={{
+                              padding: '12px 14px',
+                              color: '#38bdf8',
+                              fontWeight: 700,
+                              fontFamily: 'monospace',
+                              fontSize: '0.86rem',
+                            }}
+                          >
+                            {row.detected_onset || 'Criteria not met'}
+                          </td>
+                          <td
+                            style={{
+                              padding: '12px 14px',
+                              color: '#94a3b8',
+                              fontFamily: 'monospace',
+                              fontSize: '0.86rem',
+                            }}
+                          >
+                            {row.climatological_normal}
+                          </td>
+                          <td style={{ padding: '12px 14px' }}>
+                            <span
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                padding: '3px 10px',
+                                borderRadius: '6px',
+                                fontSize: '0.78rem',
+                                background:
+                                  Math.abs(row.error_days) <= 2
+                                    ? 'rgba(16, 185, 129, 0.18)'
+                                    : 'rgba(245, 158, 11, 0.18)',
+                                border: `1px solid ${
+                                  Math.abs(row.error_days) <= 2
+                                    ? 'rgba(16, 185, 129, 0.4)'
+                                    : 'rgba(245, 158, 11, 0.4)'
+                                }`,
+                                color: Math.abs(row.error_days) <= 2 ? '#34d399' : '#fbbf24',
+                                fontWeight: 700,
+                              }}
+                            >
+                              {row.error_days > 0
+                                ? `+${row.error_days} days (late)`
+                                : row.error_days < 0
+                                ? `${row.error_days} days (early)`
+                                : '0 days (exact)'}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px 14px', color: '#cbd5e1', fontWeight: 600 }}>
+                            {row.jun_aug_total_rain_mm ? `${row.jun_aug_total_rain_mm} mm` : '—'}
+                          </td>
+                          <td style={{ padding: '12px 14px', color: '#94a3b8', fontSize: '0.78rem' }}>
+                            {row.error_interpretation}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr
+                        style={{
+                          background: 'rgba(255, 255, 255, 0.02)',
+                          borderTop: '2px solid rgba(255, 255, 255, 0.1)',
+                        }}
+                      >
+                        <td colSpan={3} style={{ padding: '12px 14px', fontWeight: 700, color: '#e2e8f0', fontSize: '0.84rem' }}>
+                          Mean Absolute Error across {validRows.length} detected years:
+                        </td>
+                        <td colSpan={3} style={{ padding: '12px 14px' }}>
+                          <span
+                            style={{
+                              display: 'inline-block',
+                              padding: '4px 12px',
+                              borderRadius: '6px',
+                              background: 'rgba(16, 185, 129, 0.2)',
+                              border: '1px solid #10b981',
+                              color: '#34d399',
+                              fontWeight: 800,
+                              fontSize: '0.84rem',
+                            }}
+                          >
+                            {maeLabel} (MAE: {computedMae.toFixed(2)}d)
+                          </span>
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+
+                {/* Validation Caveat Box (Exact specification) */}
+                <div
+                  style={{
+                    marginTop: '16px',
+                    padding: '12px 16px',
+                    borderRadius: '8px',
+                    background: 'rgba(245, 158, 11, 0.08)',
+                    border: '1px solid rgba(245, 158, 11, 0.25)',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '10px',
+                  }}
+                >
+                  <AlertTriangle size={18} color="#fbbf24" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <div style={{ fontSize: '0.8rem', color: '#fde68a', lineHeight: 1.45 }}>
+                    <strong>Validation Caveat:</strong> {caveatText}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Small Footer Line (Exact Specification) */}
       <footer

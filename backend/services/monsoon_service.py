@@ -559,6 +559,12 @@ async def backtest_onset(
                 "data_source": "Open-Meteo Archive API (ERA5 reanalysis)",
             })
 
+    valid_errors = [abs(r["error_days"]) for r in results if r["error_days"] is not None]
+    mae = round(sum(valid_errors) / len(valid_errors), 2) if valid_errors else None
+    mae_approx = round(mae) if mae is not None else None
+    mae_label = f"Mean onset error: ~{mae_approx} days (back-test, 1 block)" if mae_approx is not None else "N/A"
+    caveat = "Single block, 4 years, approximate climatology - needs IMD gridded data at scale."
+
     return {
         "block": block,
         "latitude": latitude,
@@ -568,6 +574,10 @@ async def backtest_onset(
             "5-day cumulative >= 40 mm with >= 2 wet days (>= 2.5 mm each)"
         ),
         "backtest_results": results,
+        "mean_absolute_error_days": mae,
+        "mean_absolute_error_approx_days": mae_approx,
+        "mean_absolute_error_label": mae_label,
+        "caveat": caveat,
         "disclaimer": (
             "This backtest uses ERA5 reanalysis data from Open-Meteo, "
             "NOT IMD station observations. Error values reflect "

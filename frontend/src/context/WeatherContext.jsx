@@ -30,6 +30,33 @@ export function WeatherProvider({ children }) {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [latestVerification, setLatestVerification] = useState(null);
 
+  // Low-Bandwidth Mode & localStorage Caching State
+  const [isLowBandwidthMode, setIsLowBandwidthModeState] = useState(() => {
+    try {
+      return localStorage.getItem('gw_low_bandwidth_mode') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [simulateNetworkDrop, setSimulateNetworkDrop] = useState(false);
+  const [isDataCached, setIsDataCached] = useState(false);
+  const [lastCacheTime, setLastCacheTime] = useState(() => {
+    try {
+      return localStorage.getItem('gw_cache_timestamp') || null;
+    } catch {
+      return null;
+    }
+  });
+
+  const setIsLowBandwidthMode = useCallback((val) => {
+    setIsLowBandwidthModeState(val);
+    try {
+      localStorage.setItem('gw_low_bandwidth_mode', val ? 'true' : 'false');
+    } catch (e) {
+      console.warn('Failed to persist low bandwidth mode:', e);
+    }
+  }, []);
+
   // 1. Initial Villages Load
   useEffect(() => {
     async function initVillages() {
@@ -50,9 +77,38 @@ export function WeatherProvider({ children }) {
   }, []);
 
   // 2. Load weather, observations, alerts, advisory whenever village or scenario changes
-  const loadVillageIntelligence = useCallback(async (vId, scenario, crop, lang) => {
+  const loadVillageIntelligence = useCallback(async (vId, scenario, crop, lang, offlineOverride = false) => {
     if (!vId) return;
     setIsLoading(true);
+
+    const cacheKeyW = `gw_weather_${vId}`;
+    const cacheKeyObs = `gw_obs_${vId}`;
+    const cacheKeyAlert = `gw_alerts_${vId}`;
+    const cacheKeyAdv = `gw_adv_${vId}_${crop}`;
+
+    // If simulated offline or forced network failure:
+    if (offlineOverride) {
+      try {
+        const cWeather = localStorage.getItem(cacheKeyW);
+        const cObs = localStorage.getItem(cacheKeyObs);
+        const cAlert = localStorage.getItem(cacheKeyAlert);
+        const cAdv = localStorage.getItem(cacheKeyAdv);
+
+        if (cWeather) {
+          setWeatherData(JSON.parse(cWeather));
+          setIsDataCached(true);
+        }
+        if (cObs) setObservations(JSON.parse(cObs));
+        if (cAlert) setAlerts(JSON.parse(cAlert));
+        if (cAdv) setAdvisory(JSON.parse(cAdv));
+      } catch (err) {
+        console.error('Error reading localStorage cache:', err);
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
     try {
       const [wRes, obsRes, alertRes, advRes] = await Promise.allSettled([
         fetchVillageWeather(vId, scenario),
@@ -61,20 +117,77 @@ export function WeatherProvider({ children }) {
         fetchFarmingAdvisory(vId, crop, lang),
       ]);
 
-      if (wRes.status === 'fulfilled') setWeatherData(wRes.value);
-      if (obsRes.status === 'fulfilled') setObservations(obsRes.value);
-      if (alertRes.status === 'fulfilled') setAlerts(alertRes.value);
-      if (advRes.status === 'fulfilled') setAdvisory(advRes.value);
+      // Weather data handling with localStorage caching
+      if (wRes.status === 'fulfilled' && wRes.value) {
+        setWeatherData(wRes.value);
+        setIsDataCached(false);
+        try {
+          localStorage.setItem(cacheKeyW, JSON.stringify(wRes.value));
+          const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          localStorage.setItem('gw_cache_timestamp', nowStr);
+          setLastCacheTime(nowStr);
+        } catch (e) {
+          console.warn('Cache write error:', e);
+        }
+      } else {
+        // Network failed for weather! Fallback to cache
+        try {
+          const cWeather = localStorage.getItem(cacheKeyW);
+          if (cWeather) {
+            setWeatherData(JSON.parse(cWeather));
+            setIsDataCached(true);
+          }
+        } catch (e) {
+          console.error('Cache fallback error:', e);
+        }
+      }
+
+      if (obsRes.status === 'fulfilled' && obsRes.value) {
+        setObservations(obsRes.value);
+        try { localStorage.setItem(cacheKeyObs, JSON.stringify(obsRes.value)); } catch {}
+      } else {
+        try {
+          const cObs = localStorage.getItem(cacheKeyObs);
+          if (cObs) setObservations(JSON.parse(cObs));
+        } catch {}
+      }
+
+      if (alertRes.status === 'fulfilled' && alertRes.value) {
+        setAlerts(alertRes.value);
+        try { localStorage.setItem(cacheKeyAlert, JSON.stringify(alertRes.value)); } catch {}
+      } else {
+        try {
+          const cAlert = localStorage.getItem(cacheKeyAlert);
+          if (cAlert) setAlerts(JSON.parse(cAlert));
+        } catch {}
+      }
+
+      if (advRes.status === 'fulfilled' && advRes.value) {
+        setAdvisory(advRes.value);
+        try { localStorage.setItem(cacheKeyAdv, JSON.stringify(advRes.value)); } catch {}
+      } else {
+        try {
+          const cAdv = localStorage.getItem(cacheKeyAdv);
+          if (cAdv) setAdvisory(JSON.parse(cAdv));
+        } catch {}
+      }
     } catch (err) {
-      console.error('Error fetching village data:', err);
+      console.error('Error in loadVillageIntelligence, falling back to localStorage:', err);
+      try {
+        const cWeather = localStorage.getItem(cacheKeyW);
+        if (cWeather) {
+          setWeatherData(JSON.parse(cWeather));
+          setIsDataCached(true);
+        }
+      } catch {}
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadVillageIntelligence(selectedVillageId, demoScenario, selectedCrop, language);
-  }, [selectedVillageId, demoScenario, selectedCrop, language, loadVillageIntelligence]);
+    loadVillageIntelligence(selectedVillageId, demoScenario, selectedCrop, language, simulateNetworkDrop);
+  }, [selectedVillageId, demoScenario, selectedCrop, language, simulateNetworkDrop, loadVillageIntelligence]);
 
   // Handle Village Switch
   const handleSelectVillage = (id) => {
@@ -244,13 +357,19 @@ export function WeatherProvider({ children }) {
         setDemoScenario,
         isLoading,
         isReportModalOpen,
-        setIsReportModalOpen,
         latestVerification,
         submitReport: handleReportWeather,
         verifyReport: handleVerify,
         injectDemoAlert: handleInjectDemoAlert,
         clearDemoAlerts: handleClearDemoAlerts,
-        refresh: () => loadVillageIntelligence(selectedVillageId, demoScenario, selectedCrop, language),
+        // Low-Bandwidth & Offline Cache State
+        isLowBandwidthMode,
+        setIsLowBandwidthMode,
+        simulateNetworkDrop,
+        setSimulateNetworkDrop,
+        isDataCached,
+        lastCacheTime,
+        refresh: () => loadVillageIntelligence(selectedVillageId, demoScenario, selectedCrop, language, simulateNetworkDrop),
       }}
     >
       {children}

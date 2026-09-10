@@ -22,6 +22,12 @@ export default function Dashboard({ onInspectObservation }) {
     setIsReportModalOpen,
     setIsLocationModalOpen,
     isLoading,
+    isLowBandwidthMode,
+    setIsLowBandwidthMode,
+    simulateNetworkDrop,
+    setSimulateNetworkDrop,
+    isDataCached,
+    lastCacheTime,
     t,
     getCropLabel,
     getVillageLabel
@@ -41,7 +47,7 @@ export default function Dashboard({ onInspectObservation }) {
   return (
     <div className="dashboard-content animate-fade-in">
       {/* Village Header Sub-bar with 3-Chamber Hierarchy */}
-      <div className="village-header-bar" style={{ borderRadius: 'var(--radius-md)', marginBottom: '20px' }}>
+      <div className="village-header-bar" style={{ borderRadius: 'var(--radius-md)', marginBottom: '14px' }}>
         <div className="village-info-title">
           {/* 3 Chambers Trail */}
           <div className="chamber-breadcrumbs" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px', flexWrap: 'wrap' }}>
@@ -56,6 +62,23 @@ export default function Dashboard({ onInspectObservation }) {
             <span className="chamber-badge" style={{ background: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.4)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 700 }}>
               3. {t('chamberVillage')}: <strong>{getVillageLabel(selectedVillage.name)}</strong>
             </span>
+
+            {isDataCached && (
+              <span
+                style={{
+                  background: 'rgba(245, 158, 11, 0.25)',
+                  border: '1px solid rgba(245, 158, 11, 0.5)',
+                  color: '#fbbf24',
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  letterSpacing: '0.04em',
+                }}
+              >
+                📦 {t('cachedBadge') || 'CACHED'}
+              </span>
+            )}
           </div>
 
           <h1 className="village-name">{getVillageLabel(selectedVillage.name)}</h1>
@@ -87,6 +110,110 @@ export default function Dashboard({ onInspectObservation }) {
           <span className="badge badge-community">
             {t('primaryCrops')}: {selectedVillage.primary_crops?.map(c => getCropLabel(c)).join(', ')}
           </span>
+        </div>
+      </div>
+
+      {/* Low-Bandwidth Mode & Offline Cache Controls */}
+      <div
+        className="glass-panel"
+        style={{
+          padding: '10px 16px',
+          marginBottom: '18px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '12px',
+          borderRadius: 'var(--radius-md)',
+          background: isLowBandwidthMode ? 'rgba(16, 185, 129, 0.08)' : 'rgba(0, 0, 0, 0.25)',
+          border: isLowBandwidthMode ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid var(--border-subtle)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '1rem' }}>📶</span>
+            <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#fff' }}>
+              {t('lowBandwidthMode') || 'Low-Bandwidth Mode'}
+            </span>
+          </div>
+
+          <button
+            onClick={() => setIsLowBandwidthMode(!isLowBandwidthMode)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: isLowBandwidthMode ? '#10b981' : 'rgba(255, 255, 255, 0.1)',
+              color: isLowBandwidthMode ? '#fff' : 'var(--text-secondary)',
+              border: 'none',
+              padding: '4px 12px',
+              borderRadius: '20px',
+              fontSize: '0.74rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <span
+              style={{
+                width: '7px',
+                height: '7px',
+                borderRadius: '50%',
+                background: isLowBandwidthMode ? '#fff' : '#64748b',
+              }}
+            />
+            {isLowBandwidthMode ? 'ON' : 'OFF'}
+          </button>
+
+          <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+            {t('lowBandwidthDesc') || 'Caches last telemetry in localStorage; resilient 2G offline fallback'}
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          {/* Judge/Demo Toggle to simulate network drop */}
+          {isLowBandwidthMode && (
+            <button
+              onClick={() => setSimulateNetworkDrop(!simulateNetworkDrop)}
+              style={{
+                background: simulateNetworkDrop ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255, 255, 255, 0.06)',
+                border: `1px solid ${simulateNetworkDrop ? 'rgba(239, 68, 68, 0.45)' : 'rgba(255, 255, 255, 0.15)'}`,
+                color: simulateNetworkDrop ? '#f87171' : '#cbd5e1',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              title="Simulate network failure to see immediate fallback to localStorage cache"
+            >
+              {simulateNetworkDrop ? '⚡ Network: FAILED (Simulated)' : (t('simulateNetworkDrop') || 'Simulate Network Drop')}
+            </button>
+          )}
+
+          {/* Cached Badge */}
+          {isDataCached && (
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                background: 'rgba(245, 158, 11, 0.2)',
+                border: '1px solid rgba(245, 158, 11, 0.45)',
+                color: '#fbbf24',
+                padding: '3px 10px',
+                borderRadius: '6px',
+                fontSize: '0.72rem',
+                fontWeight: 800,
+                letterSpacing: '0.04em',
+              }}
+              title={`Rendered from localStorage cache${lastCacheTime ? ` (cached at ${lastCacheTime})` : ''}`}
+            >
+              📦 {t('cachedBadge') || 'CACHED'}
+              {lastCacheTime && <span style={{ fontSize: '0.66rem', opacity: 0.85 }}>({lastCacheTime})</span>}
+            </span>
+          )}
         </div>
       </div>
 

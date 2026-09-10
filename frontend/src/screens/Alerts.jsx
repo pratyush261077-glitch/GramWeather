@@ -184,6 +184,84 @@ export default function Alerts() {
         </div>
       </div>
 
+      {/* Mock Multi-Channel Dispatch Protocol Strip */}
+      <div
+        className="glass-panel"
+        style={{
+          padding: '12px 18px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '12px',
+          background: 'rgba(0, 0, 0, 0.35)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: 'var(--radius-md)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', fontSize: '0.84rem' }}>
+          <span style={{ color: 'var(--text-secondary)', fontWeight: 700 }}>
+            {t('deliveryLabel') || 'Delivery:'}
+          </span>
+
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#34d399', fontWeight: 600 }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10b981' }} />
+            {t('appPushLabel') || 'App push'}
+          </span>
+
+          <span style={{ color: 'var(--text-muted)' }}>·</span>
+
+          {/* SMS visually highlighted as fallback channel */}
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'rgba(245, 158, 11, 0.18)',
+              border: '1px solid rgba(245, 158, 11, 0.45)',
+              color: '#fbbf24',
+              padding: '3px 10px',
+              borderRadius: '6px',
+              fontWeight: 700,
+              fontSize: '0.8rem',
+              boxShadow: '0 0 10px rgba(245, 158, 11, 0.1)',
+            }}
+            title="Automatic fallback via telecom GSM SMS when smartphone data / 4G is disrupted"
+          >
+            <span style={{ fontSize: '0.85rem' }}>📶</span>
+            {t('smsFallbackLabel') || 'SMS (auto-fallback on 2G)'}
+          </span>
+
+          <span style={{ color: 'var(--text-muted)' }}>·</span>
+
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#34d399', fontWeight: 600 }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10b981' }} />
+            {t('whatsappLabel') || 'WhatsApp'}
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span
+            style={{
+              fontSize: '0.68rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              fontWeight: 800,
+              color: '#94a3b8',
+              background: 'rgba(255, 255, 255, 0.06)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              padding: '3px 8px',
+              borderRadius: '4px',
+            }}
+          >
+            {t('prototypeLabel') || 'Prototype'}
+          </span>
+          <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+            (Mock multi-channel dispatch; no real SMS gateway billed)
+          </span>
+        </div>
+      </div>
+
       {/* Alerts Feed */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {alerts && alerts.length > 0 ? (
@@ -275,6 +353,64 @@ export default function Alerts() {
                       Trigger: {al.parameter_trigger}
                     </span>
                   )}
+                </div>
+
+                {/* Mock Dispatch Line */}
+                <div
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '6px',
+                    background: 'rgba(0, 0, 0, 0.28)',
+                    border: '1px solid rgba(255, 255, 255, 0.06)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '10px',
+                    fontSize: '0.78rem',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                    <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>
+                      {t('deliveryLabel') || 'Delivery:'}
+                    </span>
+                    <span style={{ color: '#34d399', fontWeight: 600 }}>
+                      {t('appPushLabel') || 'App push'}
+                    </span>
+                    <span style={{ color: 'var(--text-muted)' }}>·</span>
+                    <span
+                      style={{
+                        background: 'rgba(245, 158, 11, 0.18)',
+                        color: '#fbbf24',
+                        border: '1px solid rgba(245, 158, 11, 0.4)',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        fontWeight: 700,
+                        fontSize: '0.75rem',
+                      }}
+                    >
+                      {t('smsFallbackLabel') || 'SMS (auto-fallback on 2G)'}
+                    </span>
+                    <span style={{ color: 'var(--text-muted)' }}>·</span>
+                    <span style={{ color: '#34d399', fontWeight: 600 }}>
+                      {t('whatsappLabel') || 'WhatsApp'}
+                    </span>
+                  </div>
+
+                  <span
+                    style={{
+                      fontSize: '0.66rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      color: '#94a3b8',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      padding: '2px 6px',
+                      borderRadius: '3px',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {t('prototypeLabel') || 'Prototype'}
+                  </span>
                 </div>
               </div>
             );
