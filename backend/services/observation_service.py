@@ -28,6 +28,20 @@ class ObservationService:
         # If very few observations, enrich with controlled community reports for realistic visualization
         if len(stored) < 2:
             community_defaults = get_simulated_community_reports(village_id)
+            for c in community_defaults:
+                if "image_url" not in c:
+                    c["image_url"] = None
+                if "audio_url" not in c:
+                    c["audio_url"] = None
+                if "media_attached" not in c:
+                    c["media_attached"] = {
+                        "has_image": False,
+                        "has_audio": False,
+                        "image": False,
+                        "audio": False
+                    }
+                if "confidence" not in c:
+                    c["confidence"] = c.get("confidence_score", 50.0)
             return stored + community_defaults
             
         return stored

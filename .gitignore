@@ -57,6 +57,8 @@ temp/
 ehthumbs.db
 Thumbs.db
 .vscode/
-.idea/
-*.swp
-*.swo
+# Uploads & Media Files
+backend/uploads/*
+!backend/uploads/observations/
+backend/uploads/observations/*
+!backend/uploads/observations/.gitkeep

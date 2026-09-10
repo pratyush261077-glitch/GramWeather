@@ -56,8 +56,8 @@ export default function Navbar({ activeScreen, setActiveScreen }) {
 
           {/* Farmer Weather Report Quick Action */}
           <button
-            className="btn-primary btn-report-weather"
-            onClick={() => setIsReportModalOpen(true)}
+            className={`btn-primary btn-report-weather ${activeScreen === 'report' ? 'active' : ''}`}
+            onClick={() => setActiveScreen('report')}
             title={t('btnReportWeather')}
           >
             <Send size={13} /> {t('btnReportWeather')}

@@ -70,14 +70,20 @@ class SensorReading(BaseModel):
     is_simulated: bool = True
 
 class FarmerObservationCreate(BaseModel):
-    village_id: str
+    village_id: str = "khanna"
     reporter_name: str = "Local Farmer"
     event: str  # "Raining", "Heavy Rain", "Clear", "Cloudy", "Fog", "Strong Wind", "Unusually Hot", "Hail"
     intensity: str = "Moderate"  # "Light", "Moderate", "Heavy", "None"
     time_description: str = "Just now"
     description: Optional[str] = None
+    language: Optional[str] = "en"
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    lat: Optional[float] = None
+    lon: Optional[float] = None
+    image_url: Optional[str] = None
+    audio_url: Optional[str] = None
+    media_attached: Optional[Dict[str, Any]] = None
 
 class FarmerObservation(BaseModel):
     id: str
@@ -87,11 +93,20 @@ class FarmerObservation(BaseModel):
     intensity: str
     time_description: str
     description: Optional[str] = None
+    language: Optional[str] = "en"
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    lat: Optional[float] = None
+    lon: Optional[float] = None
     timestamp: str
     status: str = "PENDING"  # "VERIFIED", "CONFLICT", "UNVERIFIED", "PENDING"
     confidence_score: float = 0.0
-    source: str = "farmer_report"
+    confidence: Optional[float] = 0.0
+    source: str = "farmer"
     is_simulated: bool = False
+    image_url: Optional[str] = None
+    audio_url: Optional[str] = None
+    media_attached: Optional[Dict[str, Any]] = None
 
 class VerificationEvidenceItem(BaseModel):
     source_name: str

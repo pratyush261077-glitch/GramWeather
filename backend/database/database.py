@@ -31,9 +31,33 @@ def init_db():
             status TEXT NOT NULL,
             confidence_score REAL NOT NULL,
             source TEXT NOT NULL,
-            is_simulated INTEGER NOT NULL DEFAULT 0
+            is_simulated INTEGER NOT NULL DEFAULT 0,
+            image_url TEXT,
+            audio_url TEXT,
+            media_attached TEXT,
+            language TEXT,
+            latitude REAL,
+            longitude REAL
         )
     """)
+
+    # Migration for existing databases: check and add missing columns
+    cursor.execute("PRAGMA table_info(observations)")
+    existing_cols = {row[1] for row in cursor.fetchall()}
+    new_cols = [
+        ("image_url", "TEXT"),
+        ("audio_url", "TEXT"),
+        ("media_attached", "TEXT"),
+        ("language", "TEXT"),
+        ("latitude", "REAL"),
+        ("longitude", "REAL")
+    ]
+    for col_name, col_type in new_cols:
+        if col_name not in existing_cols:
+            try:
+                cursor.execute(f"ALTER TABLE observations ADD COLUMN {col_name} {col_type}")
+            except Exception as e:
+                print(f"[DB Migration Warning] Could not add column {col_name}: {e}")
     
     # Verification history table
     cursor.execute("""
@@ -73,14 +97,32 @@ def save_observation(obs_data: Dict[str, Any]) -> str:
     cursor = conn.cursor()
     obs_id = obs_data.get("id") or str(uuid.uuid4())[:8]
     
+    # Prepare media_attached json
+    media_attached_val = obs_data.get("media_attached")
+    if isinstance(media_attached_val, dict):
+        media_attached_str = json.dumps(media_attached_val)
+    else:
+        has_img = bool(obs_data.get("image_url"))
+        has_aud = bool(obs_data.get("audio_url"))
+        media_attached_str = json.dumps({
+            "has_image": has_img,
+            "has_audio": has_aud,
+            "image": has_img,
+            "audio": has_aud
+        })
+
+    lat = obs_data.get("latitude") if obs_data.get("latitude") is not None else obs_data.get("lat")
+    lon = obs_data.get("longitude") if obs_data.get("longitude") is not None else obs_data.get("lon")
+
     cursor.execute("""
         INSERT INTO observations (
             id, village_id, reporter_name, event, intensity, time_description,
-            description, timestamp, status, confidence_score, source, is_simulated
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            description, timestamp, status, confidence_score, source, is_simulated,
+            image_url, audio_url, media_attached, language, latitude, longitude
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         obs_id,
-        obs_data["village_id"],
+        obs_data.get("village_id", "khanna"),
         obs_data.get("reporter_name", "Farmer"),
         obs_data["event"],
         obs_data.get("intensity", "Moderate"),
@@ -88,9 +130,15 @@ def save_observation(obs_data: Dict[str, Any]) -> str:
         obs_data.get("description", ""),
         obs_data.get("timestamp", datetime.utcnow().isoformat()),
         obs_data.get("status", "PENDING"),
-        obs_data.get("confidence_score", 0.0),
-        obs_data.get("source", "farmer_report"),
-        1 if obs_data.get("is_simulated") else 0
+        obs_data.get("confidence_score", 50.0),
+        obs_data.get("source", "farmer"),
+        1 if obs_data.get("is_simulated") else 0,
+        obs_data.get("image_url"),
+        obs_data.get("audio_url"),
+        media_attached_str,
+        obs_data.get("language", "en"),
+        float(lat) if lat is not None else None,
+        float(lon) if lon is not None else None
     ))
     conn.commit()
     conn.close()
@@ -122,6 +170,24 @@ def get_observations_for_village(village_id: str, limit: int = 20) -> List[Dict[
     
     results = []
     for r in rows:
+        r_keys = r.keys()
+        img_url = r["image_url"] if "image_url" in r_keys else None
+        aud_url = r["audio_url"] if "audio_url" in r_keys else None
+        
+        media_attached = None
+        if "media_attached" in r_keys and r["media_attached"]:
+            try:
+                media_attached = json.loads(r["media_attached"])
+            except Exception:
+                pass
+        if not media_attached:
+            media_attached = {
+                "has_image": bool(img_url),
+                "has_audio": bool(aud_url),
+                "image": bool(img_url),
+                "audio": bool(aud_url)
+            }
+
         results.append({
             "id": r["id"],
             "village_id": r["village_id"],
@@ -133,8 +199,17 @@ def get_observations_for_village(village_id: str, limit: int = 20) -> List[Dict[
             "timestamp": r["timestamp"],
             "status": r["status"],
             "confidence_score": r["confidence_score"],
+            "confidence": r["confidence_score"],
             "source": r["source"],
-            "is_simulated": bool(r["is_simulated"])
+            "is_simulated": bool(r["is_simulated"]),
+            "image_url": img_url,
+            "audio_url": aud_url,
+            "media_attached": media_attached,
+            "language": r["language"] if "language" in r_keys else "en",
+            "latitude": r["latitude"] if "latitude" in r_keys else None,
+            "longitude": r["longitude"] if "longitude" in r_keys else None,
+            "lat": r["latitude"] if "latitude" in r_keys else None,
+            "lon": r["longitude"] if "longitude" in r_keys else None,
         })
     return results
 

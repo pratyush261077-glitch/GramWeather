@@ -201,10 +201,18 @@ export function WeatherProvider({ children }) {
   // Submit Farmer Observation
   const handleReportWeather = async (payload) => {
     try {
-      const res = await submitFarmerObservation({
-        ...payload,
-        village_id: selectedVillageId,
-      });
+      let finalPayload = payload;
+      if (typeof FormData !== 'undefined' && payload instanceof FormData) {
+        if (!payload.has('village_id')) {
+          payload.append('village_id', selectedVillageId);
+        }
+      } else {
+        finalPayload = {
+          ...payload,
+          village_id: selectedVillageId,
+        };
+      }
+      const res = await submitFarmerObservation(finalPayload);
       // Refresh observations
       const updated = await fetchVillageObservations(selectedVillageId);
       setObservations(updated);

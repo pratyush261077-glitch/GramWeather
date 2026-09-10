@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { WeatherProvider, useWeather } from './context/WeatherContext';
 import Navbar from './components/Navbar';
 import Monsoon from './screens/Monsoon';
@@ -18,6 +18,14 @@ function MainAppShell() {
   const [inspectObservation, setInspectObservation] = useState(null);
   const { isReportModalOpen, setIsReportModalOpen } = useWeather();
 
+  // Route directly to report screen if modal trigger is fired
+  useEffect(() => {
+    if (isReportModalOpen) {
+      setActiveScreen('report');
+      setIsReportModalOpen(false);
+    }
+  }, [isReportModalOpen, setIsReportModalOpen]);
+
   const handleInspectObservation = (obs) => {
     setInspectObservation(obs);
     setActiveScreen('verification');
@@ -31,9 +39,12 @@ function MainAppShell() {
       {/* Screen Views */}
       <main style={{ flex: 1 }}>
         {activeScreen === 'dashboard' && (
-          <Dashboard onInspectObservation={handleInspectObservation} />
+          <Dashboard onInspectObservation={handleInspectObservation} onNavigate={setActiveScreen} />
         )}
         {activeScreen === 'monsoon' && <Monsoon onNavigate={setActiveScreen} />}
+        {activeScreen === 'report' && (
+          <ReportWeather onInspectObservation={handleInspectObservation} />
+        )}
         {activeScreen === 'verification' && (
           <Verification inspectTarget={inspectObservation} />
         )}

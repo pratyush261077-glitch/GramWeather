@@ -1113,3 +1113,116 @@
   }
 }
 
+/* Nowcast Actionable Insights Feed */
+.nowcast-card {
+  background: linear-gradient(135deg, rgba(12, 28, 22, 0.88) 0%, rgba(8, 18, 15, 0.95) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: var(--radius-md);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), 0 0 15px rgba(16, 185, 129, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.3s ease;
+}
+
+.nowcast-card:hover {
+  border-color: rgba(16, 185, 129, 0.38);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), 0 0 20px rgba(16, 185, 129, 0.12);
+}
+
+.nowcast-feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  max-height: 440px;
+  padding-right: 4px;
+}
+
+.nowcast-alert-card {
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.nowcast-alert-card:hover {
+  transform: translateX(3px);
+}
+
+.nowcast-alert-card.urgent {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.32);
+  border-left: 4px solid #ef4444;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.08);
+}
+
+.nowcast-alert-card.optimal {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.32);
+  border-left: 4px solid #10b981;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.08);
+}
+
+.nowcast-alert-card.warning {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.32);
+  border-left: 4px solid #f59e0b;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.08);
+}
+
+.nowcast-alert-card.resource {
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.32);
+  border-left: 4px solid #38bdf8;
+  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.08);
+}
+
+.nowcast-alert-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.nowcast-category-pill {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.nowcast-time-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.nowcast-message {
+  font-size: 0.83rem;
+  color: #f1f5f9;
+  line-height: 1.45;
+  font-weight: 500;
+  margin: 0;
+}
+
+.nowcast-action-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.73rem;
+}
+

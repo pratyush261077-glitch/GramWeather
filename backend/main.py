@@ -1,7 +1,9 @@
 import os
 import sys
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+import uuid
 from typing import Optional, List, Dict, Any
 
 # Ensure backend directory is in sys.path
@@ -45,6 +47,60 @@ app = FastAPI(
     description="Hyperlocal Weather Intelligence for Indian Villages (Observe -> Verify -> Fuse -> Predict -> Explain -> Learn)",
     version="1.0.0"
 )
+
+# Upload directory configuration & static file mounting
+UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads")
+OBSERVATIONS_UPLOAD_DIR = os.path.join(UPLOAD_DIR, "observations")
+os.makedirs(OBSERVATIONS_UPLOAD_DIR, exist_ok=True)
+
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+
+ALLOWED_IMAGE_EXTS = {"jpg", "jpeg", "png", "webp"}
+MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5MB
+
+ALLOWED_AUDIO_EXTS = {"webm", "mp3", "m4a", "wav", "ogg"}
+MAX_AUDIO_SIZE = 8 * 1024 * 1024  # 8MB
+
+async def save_uploaded_media(upload_file: UploadFile, allowed_exts: set, max_size: int, media_type: str) -> str:
+    filename = upload_file.filename or ""
+    ext = os.path.splitext(filename)[1].lower().lstrip(".")
+    if not ext and upload_file.content_type:
+        ct_map = {
+            "image/jpeg": "jpg",
+            "image/jpg": "jpg",
+            "image/png": "png",
+            "image/webp": "webp",
+            "audio/webm": "webm",
+            "audio/mpeg": "mp3",
+            "audio/mp3": "mp3",
+            "audio/m4a": "m4a",
+            "audio/mp4": "m4a",
+            "audio/x-m4a": "m4a",
+            "audio/wav": "wav",
+            "audio/ogg": "ogg",
+        }
+        ext = ct_map.get(upload_file.content_type.split(";")[0].strip().lower(), "")
+    
+    if ext not in allowed_exts:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid {media_type} format '.{ext}'. Allowed formats: {', '.join(sorted(allowed_exts))}"
+        )
+        
+    contents = await upload_file.read()
+    if len(contents) > max_size:
+        max_mb = max_size // (1024 * 1024)
+        raise HTTPException(
+            status_code=400,
+            detail=f"{media_type.capitalize()} exceeds maximum allowed size of {max_mb}MB"
+        )
+        
+    unique_filename = f"{uuid.uuid4().hex}.{ext}"
+    save_path = os.path.join(OBSERVATIONS_UPLOAD_DIR, unique_filename)
+    with open(save_path, "wb") as f:
+        f.write(contents)
+        
+    return f"/uploads/observations/{unique_filename}"
 
 # Enable CORS for React frontend (Vite default is 5173)
 origins = [
@@ -107,18 +163,84 @@ async def get_village_forecast(village_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/observations")
 @app.post("/api/observations")
-def submit_observation(payload: FarmerObservationCreate):
+async def submit_observation(request: Request):
     """
     Farmer weather report submission endpoint.
-    Converts human report into structured observation schema.
+    Accepts multipart/form-data (fields: event, intensity, description, language, lat, lon
+    plus optional files: image [max 5MB] and audio [max 8MB]) or application/json for text-only reports.
     """
-    res = ObservationService.submit_farmer_report(payload.dict())
-    return {"message": "Farmer report received and structured.", "observation": res}
+    content_type = request.headers.get("content-type", "")
+    
+    if "multipart/form-data" in content_type:
+        form = await request.form()
+        
+        event = form.get("event") or "Cloudy"
+        intensity = form.get("intensity") or "Moderate"
+        description = form.get("description") or ""
+        language = form.get("language") or "en"
+        lat = form.get("lat") or form.get("latitude")
+        lon = form.get("lon") or form.get("longitude")
+        village_id = form.get("village_id") or "khanna"
+        reporter_name = form.get("reporter_name") or "Local Farmer"
+        time_description = form.get("time_description") or "Just now"
+        
+        image_file = form.get("image")
+        audio_file = form.get("audio")
+        
+        image_url = None
+        if image_file and hasattr(image_file, "filename") and image_file.filename:
+            image_url = await save_uploaded_media(
+                image_file,
+                ALLOWED_IMAGE_EXTS,
+                MAX_IMAGE_SIZE,
+                "image"
+            )
+            
+        audio_url = None
+        if audio_file and hasattr(audio_file, "filename") and audio_file.filename:
+            audio_url = await save_uploaded_media(
+                audio_file,
+                ALLOWED_AUDIO_EXTS,
+                MAX_AUDIO_SIZE,
+                "audio"
+            )
+            
+        payload_dict = {
+            "event": str(event),
+            "intensity": str(intensity),
+            "description": str(description),
+            "language": str(language),
+            "lat": float(lat) if lat not in (None, "") else None,
+            "lon": float(lon) if lon not in (None, "") else None,
+            "latitude": float(lat) if lat not in (None, "") else None,
+            "longitude": float(lon) if lon not in (None, "") else None,
+            "village_id": str(village_id),
+            "reporter_name": str(reporter_name),
+            "time_description": str(time_description),
+            "image_url": image_url,
+            "audio_url": audio_url,
+        }
+    else:
+        # JSON body
+        try:
+            payload_dict = await request.json()
+        except Exception:
+            payload_dict = {}
 
+    res = ObservationService.submit_farmer_report(payload_dict)
+    
+    # Merge structured observation fields with response envelope for both top-level and nested access
+    response_data = dict(res)
+    response_data["message"] = "Farmer report received and structured."
+    response_data["observation"] = res
+    return response_data
+
+@app.get("/observations/{village_id}")
 @app.get("/api/observations/{village_id}")
 def get_observations(village_id: str, limit: int = 15):
-    """Retrieves recent farmer reports and community observations for the village."""
+    """Retrieves recent farmer reports and community observations for the village including media URLs."""
     return ObservationService.get_village_observations(village_id, limit=limit)
 
 @app.post("/api/verify")

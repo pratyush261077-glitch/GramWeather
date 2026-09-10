@@ -7,10 +7,10 @@ import CloudMovement from '../components/CloudMovement';
 import ConfidenceMeter from '../components/ConfidenceMeter';
 import AdvisoryCard from '../components/AdvisoryCard';
 import FarmerAlert from '../components/FarmerAlert';
-import ObservationCard from '../components/ObservationCard';
-import { Eye, Send, Sprout, MapPin } from '../components/icons';
+import NowcastInsights from '../components/NowcastInsights';
+import { MapPin } from '../components/icons';
 
-export default function Dashboard({ onInspectObservation }) {
+export default function Dashboard({ onInspectObservation, onNavigate }) {
   const {
     selectedVillage,
     weatherData,
@@ -263,41 +263,8 @@ export default function Dashboard({ onInspectObservation }) {
             availableCrops={selectedVillage.primary_crops}
           />
 
-          {/* Human Observation Network Feed */}
-          <div className="glass-panel" style={{ padding: '22px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div className="card-title-row">
-              <div className="card-title">
-                <Eye size={18} color="#10b981" /> {t('feedTitle')}
-              </div>
-              <button
-                className="btn-primary"
-                onClick={() => setIsReportModalOpen(true)}
-                style={{ padding: '6px 12px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}
-              >
-                <Send size={12} /> {t('addReport')}
-              </button>
-            </div>
-
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-              {t('feedSub')}
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '340px', overflowY: 'auto' }}>
-              {observations && observations.length > 0 ? (
-                observations.map((obs) => (
-                  <ObservationCard
-                    key={obs.id}
-                    observation={obs}
-                    onVerify={onInspectObservation}
-                  />
-                ))
-              ) : (
-                <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', textAlign: 'center', padding: '20px 0' }}>
-                  {t('noObservations')}
-                </div>
-              )}
-            </div>
-          </div>
+          {/* Nowcast Actionable Insights (Directly opposite 8-Direction Weather Radar) */}
+          <NowcastInsights />
         </div>
       </div>
     </div>
