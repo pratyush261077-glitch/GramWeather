@@ -116,6 +116,9 @@ export const TRANSLATIONS = {
     threeChamberTitle: "3-Chamber Location Selection",
     threeChamberSubtitle: "State ➔ Block ➔ Village",
     changeLocation: "Change Location",
+    locationPrompt: "Location",
+    enterLocationSearch: "Search or enter village name (e.g. Khanna, Baramati, Anand...)",
+    searchLocationPlaceholder: "Type village, block, or state...",
     locationConfirmed: "Active Village Location",
 
     // Hero Weather
@@ -431,6 +434,9 @@ export const TRANSLATIONS = {
     threeChamberTitle: "3-स्तरीय स्थान चयन",
     threeChamberSubtitle: "राज्य ➔ ब्लॉक ➔ गाँव",
     changeLocation: "स्थान बदलें",
+    locationPrompt: "स्थान / गाँव",
+    enterLocationSearch: "गाँव या ब्लॉक का नाम खोजें या दर्ज करें (उदा. खन्ना, बारामती, आणंद...)",
+    searchLocationPlaceholder: "गाँव, ब्लॉक या राज्य का नाम लिखें...",
     locationConfirmed: "सक्रिय गाँव स्थान",
 
     // Hero Weather
@@ -746,6 +752,9 @@ export const TRANSLATIONS = {
     threeChamberTitle: "3-ਪੱਧਰੀ ਸਥਾਨ ਚੋਣ",
     threeChamberSubtitle: "ਰਾਜ ➔ ਬਲਾਕ ➔ ਪਿੰਡ",
     changeLocation: "ਸਥਾਨ ਬਦਲੋ",
+    locationPrompt: "ਸਥਾਨ / ਪਿੰਡ",
+    enterLocationSearch: "ਪਿੰਡ ਜਾਂ ਬਲਾਕ ਦਾ ਨਾਮ ਖੋਜੋ ਜਾਂ ਦਰਜ ਕਰੋ (ਜਿਵੇਂ ਖੰਨਾ, ਬਾਰਾਮਤੀ, ਆਨੰਦ...)",
+    searchLocationPlaceholder: "ਪਿੰਡ, ਬਲਾਕ ਜਾਂ ਰਾਜ ਦਾ ਨਾਮ ਲਿਖੋ...",
     locationConfirmed: "ਸਰਗਰਮ ਪਿੰਡ ਸਥਾਨ",
 
     // Hero Weather

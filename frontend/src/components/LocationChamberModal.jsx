@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MapPin, CheckCircle2, XCircle, Sprout, Wind } from './icons';
 import { useWeather } from '../context/WeatherContext';
 
@@ -16,12 +16,29 @@ export default function LocationChamberModal() {
     handleSelectState,
     handleSelectBlock,
     handleSelectVillage,
+    villages,
     t,
     getVillageLabel,
     getCropLabel,
   } = useWeather();
 
+  const [searchQuery, setSearchQuery] = useState('');
+
   if (!isLocationModalOpen) return null;
+
+  const filteredVillages = (villages || []).filter(v => {
+    if (!searchQuery.trim()) return false;
+    const q = searchQuery.toLowerCase().trim();
+    return (
+      (v.name || '').toLowerCase().includes(q) ||
+      (v.block || '').toLowerCase().includes(q) ||
+      (v.district || '').toLowerCase().includes(q) ||
+      (v.state || '').toLowerCase().includes(q) ||
+      (getVillageLabel(v.name) || '').toLowerCase().includes(q) ||
+      (getVillageLabel(v.block || v.district) || '').toLowerCase().includes(q) ||
+      (getVillageLabel(v.state) || '').toLowerCase().includes(q)
+    );
+  });
 
   return (
     <div
@@ -90,7 +107,104 @@ export default function LocationChamberModal() {
           </button>
         </div>
 
-        {/* 3 Chambers Grid */}
+        {/* Real-time Location Search & Direct Village Entry Bar */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          background: 'rgba(0, 0, 0, 0.45)',
+          border: '1.5px solid rgba(16, 185, 129, 0.45)',
+          borderRadius: 'var(--radius-md)',
+          padding: '10px 16px',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+        }}>
+          <span style={{ fontSize: '1.1rem' }}>🔍</span>
+          <input
+            type="text"
+            placeholder={t('enterLocationSearch') || "Search or enter village name (e.g. Khanna, Baramati, Anand, Mandya, Muzaffarnagar...)"}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              outline: 'none',
+              color: '#fff',
+              fontSize: '0.92rem',
+              fontWeight: 600,
+              width: '100%',
+            }}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1rem', padding: '0 4px' }}
+              title="Clear search"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {/* Direct Search Results or 3-Chambers View */}
+        {searchQuery.trim() ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minHeight: '260px' }}>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              Matching villages ({filteredVillages.length}):
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '12px', maxHeight: '320px', overflowY: 'auto' }}>
+              {filteredVillages.map((vg) => {
+                const isCurrent = vg.id === selectedVillageId;
+                return (
+                  <div
+                    key={vg.id}
+                    onClick={() => {
+                      handleSelectState(vg.state);
+                      handleSelectBlock(vg.block || vg.district);
+                      handleSelectVillage(vg.id);
+                      setIsLocationModalOpen(false);
+                      setSearchQuery('');
+                    }}
+                    style={{
+                      padding: '14px',
+                      borderRadius: 'var(--radius-md)',
+                      background: isCurrent ? 'rgba(16, 185, 129, 0.2)' : 'rgba(0, 0, 0, 0.35)',
+                      border: isCurrent ? '1.5px solid #10b981' : '1px solid var(--border-subtle)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 800, color: '#fff', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <MapPin size={14} color="#10b981" /> {getVillageLabel(vg.name)}
+                      </div>
+                      <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', marginTop: '3px' }}>
+                        {getVillageLabel(vg.block || vg.district)} • {getVillageLabel(vg.state)}
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                        Elevation: {vg.elevation}m • Crops: {vg.primary_crops?.slice(0, 2).map(c => getCropLabel(c)).join(', ')}
+                      </div>
+                    </div>
+                    <button
+                      className="btn-primary"
+                      style={{ padding: '6px 12px', fontSize: '0.74rem' }}
+                    >
+                      Select
+                    </button>
+                  </div>
+                );
+              })}
+              {filteredVillages.length === 0 && (
+                <div style={{ color: 'var(--text-muted)', padding: '30px', textAlign: 'center', gridColumn: '1 / -1' }}>
+                  No village found matching "{searchQuery}". You can select your village using the 3 chambers below.
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          /* 3 Chambers Grid */
         <div
           style={{
             display: 'grid',
@@ -305,6 +419,7 @@ export default function LocationChamberModal() {
             </div>
           </div>
         </div>
+        )}
 
         {/* Active Selection Summary Bar */}
         <div

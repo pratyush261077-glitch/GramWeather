@@ -20,14 +20,26 @@ export default function LocationChamberSelector() {
 
   return (
     <div className="three-chamber-selector" title={t('threeChamberTitle')}>
+      {/* Visual Identification Label Prompt */}
+      <div 
+        className="location-ident-badge"
+        onClick={() => setIsLocationModalOpen(true)}
+        title={t('threeChamberSubtitle') + " - Click to enter or select village"}
+      >
+        <span className="location-pin-pulse">📍</span>
+        <span className="location-ident-text">
+          {t('locationPrompt') || 'Location'}:
+        </span>
+      </div>
+
       {/* Map Icon / Explorer Launcher */}
       <button
         type="button"
         className="chamber-icon-btn"
         onClick={() => setIsLocationModalOpen(true)}
-        title={t('threeChamberSubtitle')}
+        title="Open interactive 3-chamber location explorer (State ➔ Block ➔ Village)"
       >
-        <MapPin size={15} color="#10b981" />
+        <MapPin size={13} color="#10b981" />
       </button>
 
       {/* Chamber 1: State */}
