@@ -7,3 +7,12 @@ export async function fetchFarmingAdvisory(villageId, crop = 'Wheat', lang = 'en
 export async function fetchFarmerAlerts(villageId, lang = 'en') {
   return request(`/alerts/${villageId}?lang=${lang}`);
 }
+
+export async function injectDemoAlert(villageId) {
+  return request(`/alerts/${villageId}/inject`, { method: 'POST' });
+}
+
+export async function clearDemoAlerts(villageId) {
+  return request(`/alerts/${villageId}/clear`, { method: 'POST' });
+}
+

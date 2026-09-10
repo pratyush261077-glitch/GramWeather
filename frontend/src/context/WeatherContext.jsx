@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchVillages, fetchVillageWeather } from '../services/weatherAPI';
 import { fetchVillageObservations, submitFarmerObservation } from '../services/observationAPI';
-import { fetchFarmingAdvisory, fetchFarmerAlerts } from '../services/advisoryAPI';
+import { fetchFarmingAdvisory, fetchFarmerAlerts, injectDemoAlert, clearDemoAlerts } from '../services/advisoryAPI';
 import { runVerification } from '../services/verificationAPI';
 import {
   getTranslation,
@@ -120,6 +120,27 @@ export function WeatherProvider({ children }) {
     }
   };
 
+  // Demo alert injection and clear handlers
+  const handleInjectDemoAlert = async () => {
+    try {
+      await injectDemoAlert(selectedVillageId);
+      const updated = await fetchFarmerAlerts(selectedVillageId, language);
+      setAlerts(updated);
+    } catch (err) {
+      console.error('Error injecting demo alert:', err);
+    }
+  };
+
+  const handleClearDemoAlerts = async () => {
+    try {
+      await clearDemoAlerts(selectedVillageId);
+      const updated = await fetchFarmerAlerts(selectedVillageId, language);
+      setAlerts(updated);
+    } catch (err) {
+      console.error('Error clearing demo alerts:', err);
+    }
+  };
+
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
 
   const selectedVillage = useMemo(() => {
@@ -227,6 +248,8 @@ export function WeatherProvider({ children }) {
         latestVerification,
         submitReport: handleReportWeather,
         verifyReport: handleVerify,
+        injectDemoAlert: handleInjectDemoAlert,
+        clearDemoAlerts: handleClearDemoAlerts,
         refresh: () => loadVillageIntelligence(selectedVillageId, demoScenario, selectedCrop, language),
       }}
     >

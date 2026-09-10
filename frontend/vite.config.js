@@ -10,6 +10,16 @@ export default defineConfig({
         target: 'http://127.0.0.1:8000',
         changeOrigin: true,
         secure: false,
+      },
+      '/alerts': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/monsoon': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+        secure: false,
       }
     }
   }

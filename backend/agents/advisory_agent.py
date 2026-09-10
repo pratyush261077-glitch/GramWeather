@@ -1,140 +1,192 @@
 """
 Advisory Agent
-Converts real-time village weather parameters into actionable agricultural decisions.
-Considers crop type, humidity, rain probability, and wind velocity.
+ICAR Rule-Based Agricultural Decision Engine.
+Reads Open-Meteo telemetry (7-day rain forecast, wind speed, 24h & 48h rain risk)
+and applies ICAR-style agronomic thresholds for Wheat, Paddy, and Maize.
 """
 
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from datetime import datetime
 
 class AdvisoryAgent:
+    HONEST_LABEL = "Rule-based ICAR advisory, not expert instruction."
+
     CROP_NAMES = {
         "hi": {
-            "Wheat": "गेहूं", "Paddy": "धान", "Sugarcane": "गन्ना",
-            "Cotton": "कपास", "Mustard": "सरसों", "Maize": "मक्का",
-            "Soybean": "सोयाबीन", "Chilli": "मिर्च", "Tobacco": "तंबाकू",
-            "Pulses": "दालें"
+            "Wheat": "गेहूं", "Paddy": "धान", "Maize": "मक्का",
+            "Sugarcane": "गन्ना", "Cotton": "कपास", "Mustard": "सरसों"
         },
         "pa": {
-            "Wheat": "ਕਣਕ", "Paddy": "ਝੋਨਾ", "Sugarcane": "ਗੰਨਾ",
-            "Cotton": "ਕਪਾਹ", "Mustard": "ਸਰ੍ਹੋਂ", "Maize": "ਮੱਕੀ",
-            "Soybean": "ਸੋਇਆਬੀਨ", "Chilli": "ਮਿਰਚ", "Tobacco": "ਤੰਬਾਕੂ",
-            "Pulses": "ਦਾਲਾਂ"
+            "Wheat": "ਕਣਕ", "Paddy": "ਝੋਨਾ", "Maize": "ਮੱਕੀ",
+            "Sugarcane": "ਗੰਨਾ", "Cotton": "ਕਪਾਹ", "Mustard": "ਸਰ੍ਹੋਂ"
         }
     }
 
-    @staticmethod
+    # Crop-specific agronomic context based on ICAR recommendations
+    CROP_CONTEXTS = {
+        "Wheat": {
+            "irrigation_note": "Crown Root Initiation (CRI) and tillering are critical moisture stages for wheat.",
+            "spraying_note": "Target broadleaf weedicide or stripe rust fungicide when leaf moisture is dry.",
+            "harvesting_note": "Grain moisture must be <12% for safe silo storage without mold.",
+            "fertilizer_note": "Broadcast second split of Urea (65 kg/acre) before scheduled watering."
+        },
+        "Paddy": {
+            "irrigation_note": "Paddy requires 2-5 cm standing water during vegetative and tillering phases.",
+            "spraying_note": "Target stem borer or blast treatment; ensure at least 4h rain-free period after foliar spray.",
+            "harvesting_note": "Drain field 10-14 days prior to harvest; protect harvested grain from surface moisture.",
+            "fertilizer_note": "Split nitrogen into 3 doses; avoid top-dressing in standing water with high runoff."
+        },
+        "Maize": {
+            "irrigation_note": "Maize is highly sensitive to waterlogging; sensitive to drought at silking/tasseling.",
+            "spraying_note": "Direct spray into leaf whorls for Fall Armyworm (FAW) control during calm wind.",
+            "harvesting_note": "Harvest cobs when husk turns dry parchment; sun-dry cobs to <14% moisture to prevent aflatoxin.",
+            "fertilizer_note": "Top-dress nitrogen (40 kg/acre) at knee-high stage (V6) along rows followed by earthing up."
+        }
+    }
+
+    @classmethod
     def generate_advisory(
+        cls,
         village_id: str,
         crop: str,
-        weather: Dict[str, Any],
+        telemetry: Dict[str, Any],
         lang: str = "en"
     ) -> Dict[str, Any]:
         crop_clean = crop.strip().title()
-        temp = weather.get("temperature", 28.0)
-        humidity = weather.get("relative_humidity", 60.0)
-        rain_prob = weather.get("rain_probability", 20.0)
-        wind_speed = weather.get("wind_speed", 10.0)
-        precip = weather.get("precipitation", 0.0)
+        if crop_clean not in cls.CROP_CONTEXTS:
+            # Fallback to Wheat or match closest
+            crop_clean = "Wheat" if "wheat" in crop.lower() else ("Paddy" if "paddy" in crop.lower() else "Maize")
 
-        crop_display = AdvisoryAgent.CROP_NAMES.get(lang, {}).get(crop_clean, crop_clean)
+        temp = float(telemetry.get("temperature", 28.0) or 28.0)
+        humidity = float(telemetry.get("relative_humidity", 60.0) or 60.0)
+        wind_speed = float(telemetry.get("wind_speed_kmh", telemetry.get("wind_speed", 8.0)) or 8.0)
+        forecast_7d_rain = float(telemetry.get("forecast_7d_rain_mm", 0.0) or 0.0)
+        rain_within_24h = bool(telemetry.get("rain_within_24h", False))
+        rain_within_48h = bool(telemetry.get("rain_within_48h", False))
+        next_rain_desc = telemetry.get("next_rain_desc", "None in next 48h")
+        crop_ctx = cls.CROP_CONTEXTS.get(crop_clean, cls.CROP_CONTEXTS["Wheat"])
 
-        # 1. Irrigation recommendation
-        if rain_prob > 60.0 or precip > 2.0:
-            risk = "MODERATE" if rain_prob < 80 else "HIGH"
-            if lang == "hi":
-                irrigation_advice = f"{crop_display} के लिए सिंचाई स्थगित करें। प्राकृतिक बारिश की उच्च संभावना ({rain_prob:.0f}%) है, जिससे पंप की बिजली बचेगी और खेत में जलभराव नहीं होगा।"
-            elif lang == "pa":
-                irrigation_advice = f"{crop_display} ਲਈ ਸਿੰਚਾਈ ਰੋਕੋ। ਕੁਦਰਤੀ ਮੀਂਹ ਦੀ ਉੱਚ ਸੰਭਾਵਨਾ ({rain_prob:.0f}%) ਹੈ, ਜਿਸ ਨਾਲ ਪੰਪ ਦੀ ਬਿਜਲੀ ਬਚੇਗੀ ਅਤੇ ਖੇਤ ਵਿੱਚ ਪਾਣੀ ਨਹੀਂ ਖੜ੍ਹੇਗਾ।"
-            else:
-                irrigation_advice = f"Postpone irrigation for {crop_clean}. High probability of natural rainfall ({rain_prob:.0f}%), saving pump energy and avoiding soil saturation."
-        elif temp > 35.0 and humidity < 40.0:
-            risk = "MODERATE"
-            if lang == "hi":
-                irrigation_advice = f"उच्च वाष्पीकरण दर्ज किया गया ({temp:.1f}°C)। फसल को नमी संकट से बचाने के लिए शाम को हल्की सिंचाई या ड्रिप सिंचाई करें।"
-            elif lang == "pa":
-                irrigation_advice = f"ਵਾਸ਼ਪੀਕਰਨ ਜ਼ਿਆਦਾ ਦਰਜ ਹੋਇਆ ({temp:.1f}°C)। ਫ਼ਸਲ ਨੂੰ ਨਮੀ ਦੇ ਤਣਾਅ ਤੋਂ ਬਚਾਉਣ ਲਈ ਸ਼ਾਮ ਨੂੰ ਹਲਕੀ ਸਿੰਚਾਈ ਕਰੋ।"
-            else:
-                irrigation_advice = f"High evapotranspiration detected ({temp:.1f}°C). Provide light evening irrigation or drip watering to prevent crop moisture stress."
+        # -------------------------------------------------------------
+        # 1. Irrigation Strategy
+        # Thresholds:
+        # - >= 15 mm -> "Skip irrigation; rain expected. Recheck after rain."
+        # - 5-15 mm -> "Reduce irrigation by half and recheck soil moisture."
+        # - Else -> "Irrigate as per crop stage; soil likely drying."
+        # -------------------------------------------------------------
+        if forecast_7d_rain >= 15.0:
+            irrigation_decision = "Skip irrigation; rain expected. Recheck after rain."
+            irrigation_severity = "WARNING"
+        elif forecast_7d_rain >= 5.0:
+            irrigation_decision = "Reduce irrigation by half and recheck soil moisture."
+            irrigation_severity = "CAUTION"
         else:
-            risk = "LOW"
-            if lang == "hi":
-                irrigation_advice = f"{crop_display} के लिए सामान्य सिंचाई कार्यक्रम उपयुक्त है। मिट्टी में नमी की कमी की दर सामान्य है।"
-            elif lang == "pa":
-                irrigation_advice = f"{crop_display} ਲਈ ਆਮ ਸਿੰਚਾਈ ਸਮਾਂ-ਸਾਰਣੀ ਢੁਕਵੀਂ ਹੈ। ਮਿੱਟੀ ਵਿੱਚ ਨਮੀ ਦੀ ਕਮੀ ਆਮ ਹੈ।"
-            else:
-                irrigation_advice = f"Normal irrigation schedule suitable for {crop_clean}. Soil moisture depletion rate is moderate."
+            irrigation_decision = "Irrigate as per crop stage; soil likely drying."
+            irrigation_severity = "NORMAL"
 
-        # 2. Pesticide / Chemical spraying
-        if wind_speed > 16.0:
-            if lang == "hi":
-                spraying_advice = f"पत्तियों पर छिड़काव न करें! हवा की गति ({wind_speed:.1f} किमी/घंटा) सुरक्षित सीमा से अधिक है; दवा उड़ने से नुकसान होगा।"
-            elif lang == "pa":
-                spraying_advice = f"ਪੱਤਿਆਂ 'ਤੇ ਛਿੜਕਾਅ ਨਾ ਕਰੋ! ਹਵਾ ਦੀ ਰਫ਼ਤਾਰ ({wind_speed:.1f} km/h) ਸੁਰੱਖਿਅਤ ਸੀਮਾ ਤੋਂ ਵੱਧ ਹੈ; ਦਵਾਈ ਉੱਡਣ ਦਾ ਖ਼ਤਰਾ ਹੈ।"
-            else:
-                spraying_advice = f"Avoid foliar spraying! Wind speed ({wind_speed:.1f} km/h) exceeds spray safety threshold; chemical drift will cause loss."
-        elif rain_prob > 50.0:
-            if lang == "hi":
-                spraying_advice = f"कीटनाशक या फफूंदनाशक का छिड़काव रोकें। संभावित बारिश ({rain_prob:.0f}%) से दवा धुलने का खतरा है।"
-            elif lang == "pa":
-                spraying_advice = f"ਕੀਟਨਾਸ਼ਕ ਜਾਂ ਉੱਲੀਨਾਸ਼ਕ ਦਾ ਛਿੜਕਾਅ ਰੋਕੋ। ਮੀਂਹ ਦੀ ਸੰਭਾਵਨਾ ({rain_prob:.0f}%) ਕਾਰਨ ਦਵਾਈ ਧੁਲ ਸਕਦੀ ਹੈ।"
-            else:
-                spraying_advice = f"Hold off on pesticide or fungicide applications. Anticipated precipitation ({rain_prob:.0f}%) risks chemical wash-off."
+        irrigation_detail = f"7-day rain outlook is {forecast_7d_rain:.1f} mm. {crop_ctx['irrigation_note']}"
+
+        # -------------------------------------------------------------
+        # 2. Spraying Safety Window
+        # Show wind speed and next rain.
+        # - If wind > 12 km/h -> "Do NOT spray (wind drift)."
+        # - If rain likely within 24h -> "Do NOT spray; rain will wash off."
+        # - Else -> "Safe window: next 24-36h."
+        # -------------------------------------------------------------
+        if wind_speed > 12.0:
+            spraying_decision = "Do NOT spray (wind drift)."
+            spraying_severity = "DANGER"
+            spraying_detail = f"Wind speed {wind_speed:.1f} km/h exceeds 12 km/h safety limit. Chemical drift causes loss and non-target damage."
+        elif rain_within_24h:
+            spraying_decision = "Do NOT spray; rain will wash off."
+            spraying_severity = "DANGER"
+            spraying_detail = f"Rain likely within 24h ({next_rain_desc}). Chemical wash-off prevents foliar absorption."
         else:
-            if lang == "hi":
-                spraying_advice = f"कीटनाशक/सूक्ष्म पोषक तत्वों के छिड़काव के लिए मौसम अनुकूल है। हवा शांत ({wind_speed:.1f} किमी/घंटा) है और दवा धुलने का खतरा नहीं है।"
-            elif lang == "pa":
-                spraying_advice = f"ਕੀਟਨਾਸ਼ਕ ਅਤੇ ਪੋਸ਼ਕ ਤੱਤਾਂ ਦੇ ਛਿੜਕਾਅ ਲਈ ਮੌਸਮ ਬਿਲਕੁਲ ਢੁਕਵਾਂ ਹੈ। ਹਵਾ ਸ਼ਾਂਤ ({wind_speed:.1f} km/h) ਹੈ।"
-            else:
-                spraying_advice = f"Weather conditions optimal for pesticide/micronutrient spraying. Wind is calm ({wind_speed:.1f} km/h) with low wash-off risk."
+            spraying_decision = "Safe window: next 24-36h."
+            spraying_severity = "SAFE"
+            spraying_detail = f"Calm wind ({wind_speed:.1f} km/h) with rain-free window. {crop_ctx['spraying_note']}"
 
+        # -------------------------------------------------------------
         # 3. Harvesting & Storage
-        if rain_prob > 65.0:
-            if lang == "hi":
-                harvesting_advice = f"यदि {crop_display} की फसल पक चुकी है, तो कटाई तेज करें और कटी फसल को तुरंत तिरपाल से ढके सूखे स्थान पर रखें।"
-            elif lang == "pa":
-                harvesting_advice = f"ਜੇਕਰ {crop_display} ਪੱਕ ਚੁੱਕੀ ਹੈ, ਤਾਂ ਵਾਢੀ ਤੇਜ਼ ਕਰੋ ਅਤੇ ਤੁਰੰਤ ਤਰਪਾਲ ਹੇਠਾਂ ਸੁੱਕੀ ਜਗ੍ਹਾ ਰੱਖੋ।"
-            else:
-                harvesting_advice = f"If {crop_clean} is at harvest maturity, accelerate cutting and immediately transfer grain/produce to tarpaulin-covered dry storage."
+        # - If rain expected within 48h -> "Harvest early / cover produce."
+        # - Else -> "Favorable for harvest."
+        # -------------------------------------------------------------
+        if rain_within_48h:
+            harvesting_decision = "Harvest early / cover produce."
+            harvesting_severity = "WARNING"
+            harvesting_detail = f"Rain expected within 48h ({next_rain_desc}). Move mature produce to dry storage or secure with waterproof tarpaulin."
         else:
-            if lang == "hi":
-                harvesting_advice = f"कटाई, गहाई और खलिहान में धूप में सुखाने के लिए मौसम बहुत अनुकूल और सूखा है।"
-            elif lang == "pa":
-                harvesting_advice = f"ਫ਼ਸਲ ਦੀ ਵਾਢੀ, ਗਹਾਈ ਅਤੇ ਸੁਕਾਉਣ ਲਈ ਮੌਸਮ ਸਾਫ਼ ਅਤੇ ਅਨੁਕੂਲ ਹੈ।"
-            else:
-                harvesting_advice = f"Favorable dry weather for cutting, threshing, and open yard sun-drying of harvest."
+            harvesting_decision = "Favorable for harvest."
+            harvesting_severity = "SAFE"
+            harvesting_detail = f"Sunny, dry conditions favorable for cutting, threshing, and yard drying. {crop_ctx['harvesting_note']}"
 
-        # 4. Fertilizer application
-        if rain_prob > 60.0:
-            if lang == "hi":
-                fertilizer_advice = f"यूरिया/नाइट्रोजन उर्वरक का छिड़काव टालें। बारिश के पानी के बहाव से पोषक तत्व बह जाएंगे।"
-            elif lang == "pa":
-                fertilizer_advice = f"ਯੂਰੀਆ/ਨਾਈਟ੍ਰੋਜਨ ਖਾਦ ਪਾਉਣਾ ਟਾਲੋ। ਸੰਭਾਵਿਤ ਮੀਂਹ ਦੇ ਵਹਾਅ ਨਾਲ ਖਾਦ ਵਹਿ ਜਾਵੇਗੀ।"
-            else:
-                fertilizer_advice = f"Delay top-dressing of Urea/Nitrogen fertilizers. Surface runoff from expected rain will lead to nutrient leaching."
+        # -------------------------------------------------------------
+        # 4. Nutrient Management & Top-Dressing
+        # - If rain expected within 24h -> "Hold fertilizer; rain will leach nutrients."
+        # - Else -> "Top-dress on schedule."
+        # -------------------------------------------------------------
+        if rain_within_24h:
+            fertilizer_decision = "Hold fertilizer; rain will leach nutrients."
+            fertilizer_severity = "WARNING"
+            fertilizer_detail = f"Surface runoff from expected rain within 24h will cause nitrate leaching and financial loss. Resume after soil settles."
         else:
-            if lang == "hi":
-                fertilizer_advice = f"उर्वरक एवं पोषक तत्व देने के लिए अनुकूल एवं सुरक्षित समय है।"
-            elif lang == "pa":
-                fertilizer_advice = f"ਖਾਦ ਅਤੇ ਖੁਰਾਕੀ ਤੱਤ ਪਾਉਣ ਲਈ ਸੁਰੱਖਿਅਤ ਸਮਾਂ ਹੈ।"
-            else:
-                fertilizer_advice = f"Safe window for basal and top-dressing nutrient management."
+            fertilizer_decision = "Top-dress on schedule."
+            fertilizer_severity = "SAFE"
+            fertilizer_detail = f"Adequate soil moisture without leaching risk. {crop_ctx['fertilizer_note']}"
 
-        if lang == "hi":
-            summary = f"गाँव मौसम: {temp:.1f}°C, {humidity:.0f}% आर्द्रता, {rain_prob:.0f}% बारिश संभावना, हवा {wind_speed:.1f} किमी/घं।"
-        elif lang == "pa":
-            summary = f"ਪਿੰਡ ਮੌਸਮ: {temp:.1f}°C, {humidity:.0f}% ਨਮੀ, {rain_prob:.0f}% ਮੀਂਹ ਸੰਭਾਵਨਾ, ਹਵਾ {wind_speed:.1f} km/h."
-        else:
-            summary = f"Village weather: {temp:.1f}°C, {humidity:.0f}% RH, {rain_prob:.0f}% rain prob, wind {wind_speed:.1f} km/h."
+        summary = f"{crop_clean} ({village_id.title()}): Temp {temp:.1f}°C, RH {humidity:.0f}%, Wind {wind_speed:.1f} km/h, 7d Rain {forecast_7d_rain:.1f} mm."
 
         return {
             "village_id": village_id,
             "crop": crop_clean,
             "weather_summary": summary,
-            "irrigation_advice": irrigation_advice,
-            "spraying_advice": spraying_advice,
-            "harvesting_advice": harvesting_advice,
-            "fertilizer_advice": fertilizer_advice,
-            "risk_level": risk,
+            "honest_label": cls.HONEST_LABEL,
+            "telemetry": {
+                "temperature": temp,
+                "relative_humidity": humidity,
+                "wind_speed_kmh": wind_speed,
+                "forecast_7d_rain_mm": forecast_7d_rain,
+                "rain_within_24h": rain_within_24h,
+                "rain_within_48h": rain_within_48h,
+                "next_rain": next_rain_desc,
+            },
+            "irrigation": {
+                "title": "Irrigation Strategy",
+                "decision": irrigation_decision,
+                "detail": irrigation_detail,
+                "severity": irrigation_severity,
+                "forecast_7d_rain_mm": forecast_7d_rain,
+                "rule_threshold": "≥15 mm (Skip) · 5–15 mm (Halve) · <5 mm (Irrigate)"
+            },
+            "spraying": {
+                "title": "Spraying Safety Window",
+                "decision": spraying_decision,
+                "detail": spraying_detail,
+                "severity": spraying_severity,
+                "wind_speed_kmh": wind_speed,
+                "next_rain": next_rain_desc,
+                "rule_threshold": "Wind >12 km/h or Rain within 24h → Do NOT spray"
+            },
+            "harvesting": {
+                "title": "Harvesting & Storage",
+                "decision": harvesting_decision,
+                "detail": harvesting_detail,
+                "severity": harvesting_severity,
+                "rain_within_48h": rain_within_48h,
+                "rule_threshold": "Rain within 48h → Harvest early / cover"
+            },
+            "fertilizer": {
+                "title": "Nutrient Management & Top-Dressing",
+                "decision": fertilizer_decision,
+                "detail": fertilizer_detail,
+                "severity": fertilizer_severity,
+                "rain_within_24h": rain_within_24h,
+                "rule_threshold": "Rain within 24h → Hold fertilizer"
+            },
+            # Backwards compatibility fields
+            "irrigation_advice": f"{irrigation_decision} {irrigation_detail}",
+            "spraying_advice": f"{spraying_decision} {spraying_detail}",
+            "harvesting_advice": f"{harvesting_decision} {harvesting_detail}",
+            "fertilizer_advice": f"{fertilizer_decision} {fertilizer_detail}",
+            "risk_level": "MODERATE" if (spraying_severity == "DANGER" or irrigation_severity == "WARNING") else "LOW",
             "generated_at": datetime.utcnow().isoformat()
         }

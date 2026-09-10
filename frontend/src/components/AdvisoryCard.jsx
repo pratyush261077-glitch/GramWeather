@@ -103,9 +103,9 @@ export default function AdvisoryCard({ advisory, selectedCrop, onSelectCrop, ava
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-        <Info size={13} />
-        <span>{t('advisoryDisclaimer')}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', color: '#fbbf24', marginTop: '4px' }}>
+        <Info size={13} color="#fbbf24" />
+        <span>{advisory?.honest_label || t('honestLabel')}</span>
       </div>
     </div>
   );

@@ -1,84 +1,348 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useWeather } from '../context/WeatherContext';
-import { AlertTriangle, Info, CheckCircle2 } from '../components/icons';
+import { AlertTriangle, CheckCircle2, CloudRain, Wind, Sun, Sprout, Info, RefreshCw, Zap } from '../components/icons';
 import TransparencyBadge from '../components/TransparencyBadge';
 
 export default function Alerts() {
-  const { alerts, selectedVillage, t, getStatusLabel, translateText } = useWeather();
+  const {
+    alerts,
+    selectedVillage,
+    injectDemoAlert,
+    clearDemoAlerts,
+    t,
+    getStatusLabel,
+    translateText,
+    getVillageLabel
+  } = useWeather();
+
+  const [loadingAction, setLoadingAction] = useState(false);
+  const villageName = selectedVillage?.name || 'Khanna';
+
+  const hasInjectedAlert = Boolean(alerts && alerts.some(a => a.is_injected));
+
+  const handleInject = async () => {
+    setLoadingAction(true);
+    try {
+      if (injectDemoAlert) {
+        await injectDemoAlert();
+      }
+    } catch (err) {
+      console.error('Failed to inject demo alert:', err);
+    } finally {
+      setLoadingAction(false);
+    }
+  };
+
+  const handleClear = async () => {
+    setLoadingAction(true);
+    try {
+      if (clearDemoAlerts) {
+        await clearDemoAlerts();
+      }
+    } catch (err) {
+      console.error('Failed to clear demo alerts:', err);
+    } finally {
+      setLoadingAction(false);
+    }
+  };
+
+  const getAlertIcon = (type) => {
+    const tLower = (type || '').toLowerCase();
+    if (tLower.includes('rain')) return <CloudRain size={24} color="#ef4444" />;
+    if (tLower.includes('wind')) return <Wind size={24} color="#f59e0b" />;
+    if (tLower.includes('heat')) return <Sun size={24} color="#f59e0b" />;
+    if (tLower.includes('break')) return <Sprout size={24} color="#fbbf24" />;
+    return <AlertTriangle size={24} color="#ef4444" />;
+  };
+
+  const formatTimestamp = (ts) => {
+    if (!ts) return 'Just now';
+    try {
+      const d = new Date(ts);
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ', ' + d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    } catch {
+      return ts;
+    }
+  };
 
   return (
-    <div className="dashboard-content animate-fade-in">
-      <div className="card-title-row" style={{ marginBottom: '20px' }}>
+    <div className="dashboard-content animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* Top Header & Demo Actions Bar */}
+      <div className="card-title-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
         <div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <AlertTriangle size={22} color="#f59e0b" /> {t('alertsTitle')}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '3px 10px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', marginBottom: '6px' }}>
+            <AlertTriangle size={14} color="#f87171" />
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#f87171', letterSpacing: '0.04em' }}>
+              AUTONOMOUS THRESHOLD EVENT ENGINE
+            </span>
+          </div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', margin: 0 }}>
+            {t('alertsTitle')}
           </h2>
-          <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-            {t('alertsSub')} {selectedVillage.name}.
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
+            {t('alertsSub')} <strong>{getVillageLabel(villageName)}</strong>.
           </p>
         </div>
-        <TransparencyBadge source="Threshold Event Engine" isSimulated={false} />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          {/* Demo Inject Alert Button */}
+          <button
+            onClick={handleInject}
+            disabled={loadingAction}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              color: '#fff',
+              border: 'none',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontSize: '0.82rem',
+              fontWeight: 700,
+              cursor: loadingAction ? 'not-allowed' : 'pointer',
+              boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+              transition: 'all 0.2s ease',
+            }}
+            title="Simulate a live Heavy Rain event for judges to preview alert layout"
+          >
+            <Zap size={14} color="#fff" />
+            {loadingAction ? 'Injecting...' : t('demoInjectAlert')}
+          </button>
+
+          {/* Clear Demo Alert Button */}
+          {hasInjectedAlert && (
+            <button
+              onClick={handleClear}
+              disabled={loadingAction}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'rgba(239, 68, 68, 0.15)',
+                color: '#f87171',
+                border: '1px solid rgba(239, 68, 68, 0.35)',
+                padding: '8px 14px',
+                borderRadius: '8px',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                cursor: loadingAction ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              title="Reset alerts and clear synthetic demo event"
+            >
+              ✕ {t('demoClearAlert')}
+            </button>
+          )}
+
+          <TransparencyBadge source="Threshold Engine · IMD & Open-Meteo" isSimulated={hasInjectedAlert} />
+        </div>
       </div>
 
+      {/* Threshold Triggers Reference Strip */}
+      <div
+        className="glass-panel"
+        style={{
+          padding: '14px 18px',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '12px',
+          background: 'rgba(0, 0, 0, 0.25)',
+          fontSize: '0.76rem',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '1rem' }}>🌧️</span>
+          <div>
+            <div style={{ color: '#fff', fontWeight: 700 }}>HEAVY RAIN</div>
+            <div style={{ color: 'var(--text-secondary)' }}>Rain ≥ 64.5 mm / 24h</div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '1rem' }}>💨</span>
+          <div>
+            <div style={{ color: '#fff', fontWeight: 700 }}>STRONG WIND</div>
+            <div style={{ color: 'var(--text-secondary)' }}>Wind ≥ 40 km/h</div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '1rem' }}>☀️</span>
+          <div>
+            <div style={{ color: '#fff', fontWeight: 700 }}>HEAT</div>
+            <div style={{ color: 'var(--text-secondary)' }}>Max Temp ≥ 42°C</div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '1rem' }}>🌾</span>
+          <div>
+            <div style={{ color: '#fff', fontWeight: 700 }}>BREAK RISK</div>
+            <div style={{ color: 'var(--text-secondary)' }}>Monsoon Break: HIGH</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Alerts Feed */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {alerts && alerts.length > 0 ? (
           alerts.map((al) => {
-            const isCrit = al.severity === 'CRITICAL';
-            const isWarn = al.severity === 'WARNING';
+            const isCrit = (al.severity || '').toUpperCase() === 'CRITICAL';
+            const isWarn = (al.severity || '').toUpperCase() === 'WARNING';
             const borderColor = isCrit ? '#ef4444' : isWarn ? '#f59e0b' : '#10b981';
 
             return (
               <div
                 key={al.id}
-                className="glass-panel"
+                className="glass-panel animate-fade-in"
                 style={{
-                  padding: '20px 24px',
-                  borderLeft: `5px solid ${borderColor}`,
+                  padding: '22px 24px',
+                  borderLeft: `6px solid ${borderColor}`,
                   display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  flexDirection: 'column',
+                  gap: '14px',
+                  background: isCrit ? 'rgba(239, 68, 68, 0.05)' : 'rgba(15, 32, 28, 0.65)'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-                  {isCrit ? (
-                    <AlertTriangle size={26} color="#ef4444" />
-                  ) : isWarn ? (
-                    <AlertTriangle size={26} color="#f59e0b" />
-                  ) : (
-                    <CheckCircle2 size={26} color="#10b981" />
-                  )}
-
-                  <div>
-                    <span className={`badge ${isCrit ? 'badge-conflict' : isWarn ? 'badge-unverified' : 'badge-verified'}`}>
-                      {getStatusLabel(al.severity)}
-                    </span>
-                    <h3 style={{ fontSize: '1.1rem', color: '#fff', margin: '8px 0 4px 0' }}>
-                      {al.title_localized || translateText(al.title)}
-                    </h3>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                      {translateText(al.message)}
-                    </p>
-                    <div style={{ fontSize: '0.8rem', color: '#38bdf8', marginTop: '6px', fontWeight: 600 }}>
-                      ⚡ {t('immediateAction')}: {translateText(al.action_required)}
+                {/* Alert Header Row */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    {getAlertIcon(al.type)}
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <span style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 800,
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          background: isCrit ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)',
+                          color: isCrit ? '#f87171' : '#fbbf24',
+                          border: `1px solid ${isCrit ? 'rgba(239, 68, 68, 0.4)' : 'rgba(245, 158, 11, 0.4)'}`,
+                          letterSpacing: '0.04em'
+                        }}>
+                          {al.type || 'WEATHER ALERT'}
+                        </span>
+                        <span className={`badge ${isCrit ? 'badge-conflict' : isWarn ? 'badge-unverified' : 'badge-verified'}`}>
+                          {getStatusLabel(al.severity || 'WARNING')}
+                        </span>
+                        {al.is_injected && (
+                          <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.35)' }}>
+                            ⚡ Judge Demo Simulation
+                          </span>
+                        )}
+                      </div>
+                      <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#fff', margin: '6px 0 2px 0' }}>
+                        {al.title_localized || translateText(al.title)}
+                      </h3>
                     </div>
+                  </div>
+
+                  <div style={{ textAlign: 'right', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    <div>Source: <strong style={{ color: '#cbd5e1' }}>{al.source_label || 'Open-Meteo NWP'}</strong></div>
+                    <div>Issued: {formatTimestamp(al.timestamp)}</div>
                   </div>
                 </div>
 
-                <div style={{ textAlign: 'right' }}>
-                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t('triggerMetric')}</span>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>
-                    {al.parameter_trigger}
+                {/* Message Body */}
+                <p style={{ margin: 0, fontSize: '0.88rem', color: '#e2e8f0', lineHeight: 1.5 }}>
+                  {translateText(al.message)}
+                </p>
+
+                {/* One Action Sentence Callout (User Required Specification) */}
+                <div
+                  style={{
+                    padding: '12px 16px',
+                    borderRadius: '8px',
+                    background: isCrit ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                    border: `1px solid ${isCrit ? 'rgba(239, 68, 68, 0.35)' : 'rgba(245, 158, 11, 0.35)'}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '10px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '0.9rem' }}>⚡</span>
+                    <span style={{ fontSize: '0.92rem', fontWeight: 800, color: isCrit ? '#fecaca' : '#fef3c7' }}>
+                      {al.action_required || 'Take precautionary field measures immediately.'}
+                    </span>
                   </div>
+
+                  {al.parameter_trigger && (
+                    <span style={{ fontSize: '0.74rem', color: isCrit ? '#f87171' : '#fbbf24', fontWeight: 600 }}>
+                      Trigger: {al.parameter_trigger}
+                    </span>
+                  )}
                 </div>
               </div>
             );
           })
         ) : (
-          <div className="glass-panel" style={{ padding: '30px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-            {t('noAlerts')}
+          /* Empty State when no alerts are active */
+          <div
+            className="glass-panel"
+            style={{
+              padding: '40px 24px',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '14px',
+              color: 'var(--text-secondary)'
+            }}
+          >
+            <CheckCircle2 size={44} color="#10b981" />
+            <div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#fff', margin: '0 0 6px 0' }}>
+                {t('noAlerts')}
+              </h3>
+              <p style={{ margin: 0, fontSize: '0.84rem', color: '#94a3b8', maxWidth: '500px', lineHeight: 1.5 }}>
+                All meteorological parameters (24h rain &lt; 64.5 mm, wind &lt; 40 km/h, temperature &lt; 42°C, and monsoon break risk) are currently within safe agronomic thresholds for <strong>{getVillageLabel(villageName)}</strong>.
+              </p>
+            </div>
+            <button
+              onClick={handleInject}
+              disabled={loadingAction}
+              style={{
+                marginTop: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'rgba(16, 185, 129, 0.15)',
+                border: '1px solid rgba(16, 185, 129, 0.35)',
+                color: '#34d399',
+                padding: '8px 18px',
+                borderRadius: '8px',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <Zap size={14} /> Click to Inject Synthetic Heavy Rain Event (Demo)
+            </button>
           </div>
         )}
       </div>
+
+      {/* Screen Footer */}
+      <footer
+        style={{
+          marginTop: '6px',
+          padding: '12px 18px',
+          borderRadius: 'var(--radius-md)',
+          background: 'rgba(0, 0, 0, 0.35)',
+          border: '1px solid rgba(255, 255, 255, 0.06)',
+          textAlign: 'center',
+          fontSize: '0.78rem',
+          color: 'var(--text-secondary)',
+          lineHeight: 1.5,
+        }}
+      >
+        <span>Data: Open-Meteo NWP Forecast & IMD Threshold Standards (64.5 mm / 24h Heavy Rain, 40 km/h Wind, 42°C Heat).</span>
+      </footer>
     </div>
   );
 }

@@ -201,39 +201,60 @@ async def get_village_confidence(village_id: str):
         "last_updated": "Just now"
     }
 
+@app.get("/advisory/{village_id}")
 @app.get("/api/advisory/{village_id}")
 async def get_advisory(
     village_id: str,
     crop: Optional[str] = "Wheat",
     lang: Optional[str] = Query("en", description="Language code: en, hi, or pa")
 ):
-    """Generates AI farming advisory for specific crop and current village conditions."""
-    village = get_village_by_id(village_id)
-    if not village:
-        raise HTTPException(status_code=404, detail="Village not found")
-
-    ext_weather = await OpenMeteoAdapter.fetch_current_weather(
-        village["latitude"],
-        village["longitude"]
+    """
+    Generates ICAR rule-based agricultural advisory for specific crop (Wheat, Paddy, Maize)
+    using live Open-Meteo telemetry (7-day rain sum, wind speed, 24h & 48h precipitation).
+    """
+    village = _resolve_village(village_id)
+    telemetry = await OpenMeteoAdapter.fetch_advisory_telemetry(
+        float(village.get("latitude", 30.70)),
+        float(village.get("longitude", 76.22))
     )
-    
-    return AdvisoryAgent.generate_advisory(village_id, crop or "Wheat", ext_weather, lang=lang or "en")
+    return AdvisoryAgent.generate_advisory(
+        village_id=village_id,
+        crop=crop or "Wheat",
+        telemetry=telemetry,
+        lang=lang or "en"
+    )
 
+@app.get("/alerts/{village_id}")
 @app.get("/api/alerts/{village_id}")
 async def get_alerts(village_id: str, lang: Optional[str] = "en"):
-    """Returns weather warnings and actionable farmer alerts."""
-    village = get_village_by_id(village_id)
-    if not village:
-        raise HTTPException(status_code=404, detail="Village not found")
-
-    ext_weather = await OpenMeteoAdapter.fetch_current_weather(
-        village["latitude"],
-        village["longitude"]
+    """
+    Threshold Event Engine for severe weather warnings:
+    - HEAVY RAIN: forecast rain >= 64.5 mm in 24h -> "Avoid irrigation, protect harvested produce."
+    - STRONG WIND: wind >= 40 km/h -> "Secure vulnerable crops and structures."
+    - HEAT: max temperature >= 42 C -> "High temperature, check crop water needs."
+    - BREAK RISK: monsoon break risk is HIGH -> "Monsoon break likely, plan irrigation backup."
+    """
+    village = _resolve_village(village_id)
+    telemetry = await OpenMeteoAdapter.fetch_advisory_telemetry(
+        float(village.get("latitude", 30.70)),
+        float(village.get("longitude", 76.22))
     )
-    
-    alerts = AlertAgent.evaluate_weather_alerts(village_id, ext_weather)
-    formatted = [NotificationService.format_alert_for_language(a, lang=lang) for a in alerts]
+    alerts = AlertAgent.evaluate_weather_alerts(village_id, telemetry)
+    formatted = [NotificationService.format_alert_for_language(a, lang=lang or "en") for a in alerts]
     return formatted
+
+@app.post("/alerts/{village_id}/inject")
+@app.post("/api/alerts/{village_id}/inject")
+async def inject_demo_alert(village_id: str):
+    """Injects a synthetic Heavy Rain event for judges to preview live alert triggers."""
+    return AlertAgent.inject_demo_alert(village_id)
+
+@app.post("/alerts/{village_id}/clear")
+@app.post("/api/alerts/{village_id}/clear")
+async def clear_demo_alerts(village_id: str):
+    """Clears injected synthetic demo alerts for the village."""
+    AlertAgent.clear_demo_alerts(village_id)
+    return {"status": "cleared", "village_id": village_id}
 
 @app.get("/api/direction-weather/{village_id}")
 async def get_direction_weather(village_id: str):
