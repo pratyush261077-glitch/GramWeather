@@ -12,6 +12,7 @@ import WeatherMap from './screens/WeatherMap';
 import History from './screens/History';
 import ReportWeather from './screens/ReportWeather';
 import LocationChamberModal from './components/LocationChamberModal';
+import ErrorBoundary from './components/ErrorBoundary';
 import './styles/global.css';
 import './styles/dashboard.css';
 
@@ -125,19 +126,29 @@ function AppRoot() {
 
   // If unauthenticated, display the Auth Screen before the app
   if (!isAuthenticated) {
-    return <Auth />;
+    return (
+      <ErrorBoundary>
+        <Auth />
+      </ErrorBoundary>
+    );
   }
 
   // Once authenticated, display the full GramWeather AI application
-  return <MainAppShell />;
+  return (
+    <ErrorBoundary>
+      <MainAppShell />
+    </ErrorBoundary>
+  );
 }
 
 export default function App() {
   return (
-    <WeatherProvider>
-      <AuthProvider>
-        <AppRoot />
-      </AuthProvider>
-    </WeatherProvider>
+    <ErrorBoundary>
+      <WeatherProvider>
+        <AuthProvider>
+          <AppRoot />
+        </AuthProvider>
+      </WeatherProvider>
+    </ErrorBoundary>
   );
 }

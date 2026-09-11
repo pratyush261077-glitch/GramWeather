@@ -260,56 +260,6 @@ export default function Verification({ inspectTarget }) {
               </tr>
             </thead>
             <tbody>
-              {/* If media attached, display Farmer photo/voice report row in matrix */}
-              {(hasImage || hasAudio) && (
-                <tr style={{ background: 'rgba(56, 189, 248, 0.05)' }}>
-                  <td style={{ fontWeight: 700, color: '#38bdf8' }}>Farmer photo/voice report</td>
-                  <td style={{ color: 'var(--text-primary)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      {activeObservation.image_url && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <img
-                            src={activeObservation.image_url}
-                            alt="Evidence thumbnail"
-                            onClick={() => setSelectedMediaZoom(activeObservation.image_url)}
-                            style={{
-                              width: '42px',
-                              height: '42px',
-                              objectFit: 'cover',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              border: '1px solid #38bdf8'
-                            }}
-                            title="Click to view full photo"
-                          />
-                          <span style={{ fontSize: '0.72rem', color: '#cbd5e1' }}>Photo: user-uploaded, time & location stamped</span>
-                        </div>
-                      )}
-                      {activeObservation.audio_url && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <audio controls src={activeObservation.audio_url} style={{ height: '28px', maxWidth: '170px' }} />
-                          <span style={{ fontSize: '0.72rem', color: '#cbd5e1' }}>Voice note: on-device transcription</span>
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                  <td>
-                    <span style={{ color: '#34d399', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 700 }}>
-                      <CheckCircle2 size={14} /> Corroborating
-                    </span>
-                  </td>
-                  <td style={{ color: 'var(--text-secondary)' }}>Direct (100%)</td>
-                  <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                    {activeObservation.description ? `"${activeObservation.description}"` : 'Direct visual/voice ground observation'}
-                  </td>
-                  <td>
-                    <span className="badge" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', fontSize: '0.7rem' }}>
-                      Local Upload
-                    </span>
-                  </td>
-                </tr>
-              )}
-
               {verificationData?.evidence_breakdown?.map((ev, i) => (
                 <tr key={i}>
                   <td style={{ fontWeight: 700, color: '#fff' }}>{ev.source_name}</td>

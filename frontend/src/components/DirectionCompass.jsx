@@ -72,13 +72,33 @@ export default function DirectionCompass({ directionData, windDirectionDeg, wind
           >
             {isSweepActive ? '● RADAR SWEEP ON' : '○ RADAR PAUSED'}
           </button>
-          <TransparencyBadge source="NWP Spatial Gradient Model" isSimulated={false} />
+          <TransparencyBadge source="NWP Spatial Gradient (Simulated Radar UI)" isSimulated={true} />
         </div>
       </div>
 
-      <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '4px 0 12px 0' }}>
-        {t('compassSub')}
-      </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', margin: '4px 0 12px 0' }}>
+        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0 }}>
+          {t('compassSub')}
+        </p>
+        <div>
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'rgba(245, 158, 11, 0.12)',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+              padding: '3px 8px',
+              borderRadius: '6px',
+              fontSize: '0.68rem',
+              color: '#fbbf24',
+              fontWeight: 600,
+            }}
+          >
+            ℹ️ Illustrative nowcast (NWP spatial gradient / not live Doppler radar)
+          </span>
+        </div>
+      </div>
 
       {/* Interactive Radar Display */}
       <div className="compass-container">
@@ -209,6 +229,9 @@ export default function DirectionCompass({ directionData, windDirectionDeg, wind
               <span>
                 {t('eta')}: <strong style={{ color: '#fbbf24' }}>~{activeDetail.estimated_arrival_minutes || 45} min</strong>
               </span>
+            </div>
+            <div style={{ fontSize: '0.67rem', color: 'var(--text-muted)', marginTop: '6px' }}>
+              * Cell distance, trajectory vector, and arrival ETA are illustrative model projections (not live Doppler radar).
             </div>
           </div>
 

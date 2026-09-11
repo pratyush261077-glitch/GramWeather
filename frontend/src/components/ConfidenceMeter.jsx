@@ -31,10 +31,23 @@ export default function ConfidenceMeter({ confidenceScore, verificationStatus, s
             {t('confidenceDesc')}
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', marginTop: '4px' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-              {t('sensorsOnline')}:{' '}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+              <span>{t('sensorsOnline')}:</span>
               <strong style={{ color: '#34d399' }}>{sensorsOnlineCount ?? 2} {t('microStations')}</strong>
+              <span
+                style={{
+                  fontSize: '0.66rem',
+                  fontWeight: 700,
+                  color: '#fbbf24',
+                  background: 'rgba(245, 158, 11, 0.15)',
+                  border: '1px solid rgba(245, 158, 11, 0.35)',
+                  padding: '1px 6px',
+                  borderRadius: '4px',
+                }}
+              >
+                Simulated ESP32 mesh (demo)
+              </span>
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
               {t('farmerReportsActive')}:{' '}

@@ -2,6 +2,7 @@ import React from 'react';
 import { Sun, CloudRain, Droplets, Wind, Compass } from './icons';
 import TransparencyBadge from './TransparencyBadge';
 import { useWeather } from '../context/WeatherContext';
+import { WeatherConditionBadge } from '../utils/weatherIcons';
 
 export default function WeatherCards({ currentWeather }) {
   const { t, getConditionLabel } = useWeather();
@@ -23,7 +24,6 @@ export default function WeatherCards({ currentWeather }) {
   const windSpeed = Math.round(currentWeather.wind_speed ?? 12);
   const windDir = currentWeather.wind_direction_cardinal || 'SE';
   const pressure = Math.round(currentWeather.surface_pressure ?? 1012);
-  const isRainy = rainProb > 50 || currentWeather.precipitation > 0;
 
   return (
     <div className="glass-panel weather-hero-card animate-fade-in">
@@ -44,15 +44,12 @@ export default function WeatherCards({ currentWeather }) {
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
           <TransparencyBadge source="Open-Meteo API" isSimulated={currentWeather.is_simulated} />
-          {isRainy ? (
-            <div style={{ color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', fontWeight: 600 }}>
-              <CloudRain size={16} /> {t('rainSystemActive')}
-            </div>
-          ) : (
-            <div style={{ color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', fontWeight: 600 }}>
-              <Sun size={16} /> {t('stableWeatherWindow')}
-            </div>
-          )}
+          <WeatherConditionBadge
+            condition={condition}
+            rainProbability={rainProb}
+            precipitation={currentWeather.precipitation || 0}
+            size={16}
+          />
         </div>
       </div>
 

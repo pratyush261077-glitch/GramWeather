@@ -22,7 +22,11 @@ export default function CloudMovement({ cloudMovement, currentWindSpeed, current
         <div className="card-title">
           <CloudRain size={18} color="#38bdf8" /> {t('cloudMovementTitle')}
         </div>
-        <TransparencyBadge source="Wind Advection Vector" isSimulated={false} />
+        <TransparencyBadge source="NWP Wind Advection (Model Nowcast)" isSimulated={true} />
+      </div>
+
+      <div style={{ fontSize: '0.68rem', color: '#fbbf24', marginTop: '-6px', marginBottom: '14px' }}>
+        ℹ️ Illustrative nowcast derived from Open-Meteo wind vectors (not live satellite tracking)
       </div>
 
       <div className="trajectory-track">

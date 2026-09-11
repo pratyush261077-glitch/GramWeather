@@ -29,6 +29,7 @@ export function WeatherProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [latestVerification, setLatestVerification] = useState(null);
+  const [apiError, setApiError] = useState(null);
 
   // Low-Bandwidth Mode & localStorage Caching State
   const [isLowBandwidthMode, setIsLowBandwidthModeState] = useState(() => {
@@ -121,6 +122,7 @@ export function WeatherProvider({ children }) {
       if (wRes.status === 'fulfilled' && wRes.value) {
         setWeatherData(wRes.value);
         setIsDataCached(false);
+        setApiError(null);
         try {
           localStorage.setItem(cacheKeyW, JSON.stringify(wRes.value));
           const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -130,15 +132,21 @@ export function WeatherProvider({ children }) {
           console.warn('Cache write error:', e);
         }
       } else {
-        // Network failed for weather! Fallback to cache
+        // Network failed or 404 for weather!
+        const errMsg = wRes.reason?.message || `No data available for village '${vId}'`;
         try {
           const cWeather = localStorage.getItem(cacheKeyW);
-          if (cWeather) {
+          if (cWeather && isLowBandwidthMode) {
             setWeatherData(JSON.parse(cWeather));
             setIsDataCached(true);
+            setApiError(null);
+          } else {
+            setWeatherData(null);
+            setApiError(errMsg);
           }
         } catch (e) {
-          console.error('Cache fallback error:', e);
+          setWeatherData(null);
+          setApiError(errMsg);
         }
       }
 
@@ -172,14 +180,27 @@ export function WeatherProvider({ children }) {
         } catch {}
       }
     } catch (err) {
-      console.error('Error in loadVillageIntelligence, falling back to localStorage:', err);
-      try {
-        const cWeather = localStorage.getItem(cacheKeyW);
-        if (cWeather) {
-          setWeatherData(JSON.parse(cWeather));
-          setIsDataCached(true);
+      console.error('Error in loadVillageIntelligence:', err);
+      const errMsg = err.message || `No data available for village '${vId}'`;
+      if (isLowBandwidthMode) {
+        try {
+          const cWeather = localStorage.getItem(cacheKeyW);
+          if (cWeather) {
+            setWeatherData(JSON.parse(cWeather));
+            setIsDataCached(true);
+            setApiError(null);
+          } else {
+            setWeatherData(null);
+            setApiError(errMsg);
+          }
+        } catch {
+          setWeatherData(null);
+          setApiError(errMsg);
         }
-      } catch {}
+      } else {
+        setWeatherData(null);
+        setApiError(errMsg);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -394,6 +415,8 @@ export function WeatherProvider({ children }) {
         demoScenario,
         setDemoScenario,
         isLoading,
+        apiError,
+        setApiError,
         isReportModalOpen,
         latestVerification,
         submitReport: handleReportWeather,

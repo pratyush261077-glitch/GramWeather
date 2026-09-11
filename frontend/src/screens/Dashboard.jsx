@@ -8,7 +8,7 @@ import ConfidenceMeter from '../components/ConfidenceMeter';
 import AdvisoryCard from '../components/AdvisoryCard';
 import FarmerAlert from '../components/FarmerAlert';
 import NowcastInsights from '../components/NowcastInsights';
-import { MapPin } from '../components/icons';
+import { MapPin, AlertTriangle, RefreshCw } from '../components/icons';
 
 export default function Dashboard({ onInspectObservation, onNavigate }) {
   const {
@@ -22,6 +22,8 @@ export default function Dashboard({ onInspectObservation, onNavigate }) {
     setIsReportModalOpen,
     setIsLocationModalOpen,
     isLoading,
+    apiError,
+    refresh,
     isLowBandwidthMode,
     setIsLowBandwidthMode,
     simulateNetworkDrop,
@@ -32,6 +34,61 @@ export default function Dashboard({ onInspectObservation, onNavigate }) {
     getCropLabel,
     getVillageLabel
   } = useWeather();
+
+  if (apiError && !weatherData) {
+    return (
+      <div className="dashboard-content animate-fade-in" style={{ padding: '60px 20px', textAlign: 'center' }}>
+        <div
+          className="glass-panel"
+          style={{
+            maxWidth: '520px',
+            margin: '0 auto',
+            padding: '36px 28px',
+            border: '1px solid rgba(239, 68, 68, 0.4)',
+            borderRadius: '20px',
+            background: 'rgba(15, 32, 28, 0.9)',
+          }}
+        >
+          <div
+            style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              background: 'rgba(239, 68, 68, 0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px',
+            }}
+          >
+            <AlertTriangle size={28} color="#ef4444" />
+          </div>
+          <h3 style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 800, marginBottom: '8px' }}>
+            No Weather Data for {selectedVillage?.name || 'Selected Village'}
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '22px' }}>
+            {apiError}. Zero fake fallback numbers are rendered. Please verify connectivity or select a different village from the 3-chamber selector.
+          </p>
+          <button
+            type="button"
+            onClick={refresh}
+            className="btn-primary"
+            style={{
+              padding: '11px 22px',
+              fontSize: '0.88rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              cursor: 'pointer',
+            }}
+          >
+            <RefreshCw size={14} />
+            <span>Retry Atmospheric Telemetry</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading && !weatherData) {
     return (

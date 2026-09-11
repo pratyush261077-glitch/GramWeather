@@ -89,7 +89,7 @@ export default function NowcastInsights({ alerts = null }) {
 
       {/* Subtitle explicitly clarifying fusion of Radar + Human Ground Reports */}
       <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '0 0 10px 0', lineHeight: 1.35 }}>
-        Real-time AI advisories cross-verified from multiple sources: <strong style={{ color: 'var(--accent-emerald)' }}>Doppler radar sweeps</strong>, <strong style={{ color: '#38bdf8' }}>Report Weather ground truth from farmers</strong>, and <strong style={{ color: '#fff' }}>IoT mesh sensors</strong>.
+        Real-time AI advisories cross-verified from multiple sources: <strong style={{ color: 'var(--accent-emerald)' }}>Radar sweeps</strong>, <strong style={{ color: '#38bdf8' }}>Report Weather ground truth entered by humans</strong>, and <strong style={{ color: '#fff' }}>ESP32 mesh sensors</strong>.
       </p>
 
       {/* 2. Scrollable Alert Feed */}
