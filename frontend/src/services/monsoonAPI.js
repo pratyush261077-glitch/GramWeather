@@ -1,9 +1,9 @@
 import { request } from './api';
 
-export async function fetchMonsoonOutlook(villageId) {
-  return request(`/monsoon/${villageId}`);
+export async function fetchMonsoonOutlook(villageId, options = {}) {
+  return request(`/monsoon/${villageId}`, options);
 }
 
-export async function fetchMonsoonBacktest(villageId) {
-  return request(`/monsoon/${villageId}/backtest`);
+export async function fetchMonsoonBacktest(villageId, options = {}) {
+  return request(`/monsoon/${villageId}/backtest`, options);
 }

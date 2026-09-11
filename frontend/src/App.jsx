@@ -13,6 +13,7 @@ import History from './screens/History';
 import ReportWeather from './screens/ReportWeather';
 import LocationChamberModal from './components/LocationChamberModal';
 import ErrorBoundary from './components/ErrorBoundary';
+import MobileBottomNav from './components/MobileBottomNav';
 import './styles/global.css';
 import './styles/dashboard.css';
 
@@ -40,7 +41,7 @@ function MainAppShell() {
       <Navbar activeScreen={activeScreen} setActiveScreen={setActiveScreen} />
 
       {/* Screen Views */}
-      <main style={{ flex: 1 }}>
+      <main className="main-content" style={{ flex: 1 }}>
         {activeScreen === 'dashboard' && (
           <Dashboard onInspectObservation={handleInspectObservation} onNavigate={setActiveScreen} />
         )}
@@ -64,6 +65,9 @@ function MainAppShell() {
 
       {/* 3-Chamber Location Selection Modal */}
       <LocationChamberModal />
+
+      {/* Sticky Bottom Navigation Bar for Mobile (< 768px) */}
+      <MobileBottomNav activeScreen={activeScreen} setActiveScreen={setActiveScreen} />
 
       {/* Footer */}
       <footer

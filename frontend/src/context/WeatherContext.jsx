@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { fetchVillages, fetchVillageWeather } from '../services/weatherAPI';
 import { fetchVillageObservations, submitFarmerObservation } from '../services/observationAPI';
 import { fetchFarmingAdvisory, fetchFarmerAlerts, injectDemoAlert, clearDemoAlerts } from '../services/advisoryAPI';
@@ -30,6 +30,10 @@ export function WeatherProvider({ children }) {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [latestVerification, setLatestVerification] = useState(null);
   const [apiError, setApiError] = useState(null);
+
+  // Network cancellation & timer tracking refs
+  const abortControllerRef = useRef(null);
+  const lastFetchTimeRef = useRef(Date.now());
 
   // Low-Bandwidth Mode & localStorage Caching State
   const [isLowBandwidthMode, setIsLowBandwidthModeState] = useState(() => {
@@ -80,6 +84,14 @@ export function WeatherProvider({ children }) {
   // 2. Load weather, observations, alerts, advisory whenever village or scenario changes
   const loadVillageIntelligence = useCallback(async (vId, scenario, crop, lang, offlineOverride = false) => {
     if (!vId) return;
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    const signal = controller.signal;
+
     setIsLoading(true);
 
     const cacheKeyW = `gw_weather_${vId}`;
@@ -105,18 +117,22 @@ export function WeatherProvider({ children }) {
       } catch (err) {
         console.error('Error reading localStorage cache:', err);
       } finally {
-        setIsLoading(false);
+        if (!signal.aborted) {
+          setIsLoading(false);
+        }
       }
       return;
     }
 
     try {
       const [wRes, obsRes, alertRes, advRes] = await Promise.allSettled([
-        fetchVillageWeather(vId, scenario),
-        fetchVillageObservations(vId),
-        fetchFarmerAlerts(vId, lang),
-        fetchFarmingAdvisory(vId, crop, lang),
+        fetchVillageWeather(vId, scenario, { signal }),
+        fetchVillageObservations(vId, { signal }),
+        fetchFarmerAlerts(vId, lang, { signal }),
+        fetchFarmingAdvisory(vId, crop, lang, { signal }),
       ]);
+
+      if (signal.aborted) return;
 
       // Weather data handling with localStorage caching
       if (wRes.status === 'fulfilled' && wRes.value) {
@@ -180,6 +196,7 @@ export function WeatherProvider({ children }) {
         } catch {}
       }
     } catch (err) {
+      if (signal.aborted) return;
       console.error('Error in loadVillageIntelligence:', err);
       const errMsg = err.message || `No data available for village '${vId}'`;
       if (isLowBandwidthMode) {
@@ -202,12 +219,61 @@ export function WeatherProvider({ children }) {
         setApiError(errMsg);
       }
     } finally {
-      setIsLoading(false);
+      if (!signal.aborted) {
+        setIsLoading(false);
+      }
     }
+  }, [isLowBandwidthMode]);
+
+  // Clean up any ongoing fetch on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, []);
 
+  // Update last fetch timestamp when data loads
+  useEffect(() => {
+    if (weatherData) {
+      lastFetchTimeRef.current = Date.now();
+    }
+  }, [weatherData]);
+
+  // Initial and reactive fetch on dependency change
   useEffect(() => {
     loadVillageIntelligence(selectedVillageId, demoScenario, selectedCrop, language, simulateNetworkDrop);
+  }, [selectedVillageId, demoScenario, selectedCrop, language, simulateNetworkDrop, loadVillageIntelligence]);
+
+  // Single visibility-aware background refresh timer (60s max)
+  useEffect(() => {
+    const INTERVAL_MS = 60000;
+    const intervalId = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible' && !simulateNetworkDrop) {
+        loadVillageIntelligence(selectedVillageId, demoScenario, selectedCrop, language, false);
+      }
+    }, INTERVAL_MS);
+
+    const handleVisibilityChange = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible' && !simulateNetworkDrop) {
+        const elapsed = Date.now() - lastFetchTimeRef.current;
+        if (elapsed > INTERVAL_MS) {
+          loadVillageIntelligence(selectedVillageId, demoScenario, selectedCrop, language, false);
+        }
+      }
+    };
+
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+    }
+
+    return () => {
+      clearInterval(intervalId);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+      }
+    };
   }, [selectedVillageId, demoScenario, selectedCrop, language, simulateNetworkDrop, loadVillageIntelligence]);
 
   // Handle Village Switch
@@ -245,18 +311,20 @@ export function WeatherProvider({ children }) {
   };
 
   // Run Verification on an observation
-  const handleVerify = async (observation, scenarioOverride) => {
+  const handleVerify = async (observation, scenarioOverride, options = {}) => {
     try {
       const result = await runVerification(
         observation,
-        scenarioOverride || demoScenario
+        scenarioOverride || demoScenario,
+        options
       );
       setLatestVerification(result);
       // Refresh observations to reflect updated status
-      const updated = await fetchVillageObservations(selectedVillageId);
+      const updated = await fetchVillageObservations(selectedVillageId, options);
       setObservations(updated);
       return result;
     } catch (err) {
+      if (err.name === 'AbortError') throw err;
       console.error('Verification error:', err);
       throw err;
     }

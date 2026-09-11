@@ -1,21 +1,21 @@
 import { request } from './api';
 
-export async function fetchVillages() {
-  return request('/villages');
+export async function fetchVillages(options = {}) {
+  return request('/villages', options);
 }
 
-export async function fetchVillageWeather(villageId, scenario = 'normal') {
-  return request(`/weather/${villageId}?scenario=${scenario}`);
+export async function fetchVillageWeather(villageId, scenario = 'normal', options = {}) {
+  return request(`/weather/${villageId}?scenario=${scenario}`, options);
 }
 
-export async function fetchVillageForecast(villageId) {
-  return request(`/forecast/${villageId}`);
+export async function fetchVillageForecast(villageId, options = {}) {
+  return request(`/forecast/${villageId}`, options);
 }
 
-export async function fetchDirectionWeather(villageId) {
-  return request(`/direction-weather/${villageId}`);
+export async function fetchDirectionWeather(villageId, options = {}) {
+  return request(`/direction-weather/${villageId}`, options);
 }
 
-export async function fetchVillageHistory(villageId) {
-  return request(`/history/${villageId}`);
+export async function fetchVillageHistory(villageId, options = {}) {
+  return request(`/history/${villageId}`, options);
 }

@@ -222,6 +222,7 @@ export default function Advisory() {
                 onClick={() => setSelectedCrop(c)}
                 style={{
                   padding: '10px 18px',
+                  minHeight: '44px',
                   borderRadius: '10px',
                   fontSize: '0.88rem',
                   fontWeight: 700,
@@ -250,7 +251,7 @@ export default function Advisory() {
       </div>
 
       {/* Main 4 ICAR Advisory Cards Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '18px' }}>
+      <div className="advisory-cards-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '18px' }}>
         
         {/* CARD 1: IRRIGATION STRATEGY */}
         <div className="glass-panel" style={{ padding: '22px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '14px' }}>

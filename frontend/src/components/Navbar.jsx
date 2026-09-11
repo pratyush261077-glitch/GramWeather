@@ -38,8 +38,8 @@ export default function Navbar({ activeScreen, setActiveScreen }) {
           {/* 3-Chamber Location Selector (State -> Block -> Village) */}
           <LocationChamberSelector />
 
-          {/* Demo Scenario Preset Toggle */}
-          <div className="village-select-wrapper" title="Controlled presentation scenario">
+          {/* Demo Scenario Preset Toggle (Desktop only; on mobile controlled via scenario buttons in screens) */}
+          <div className="village-select-wrapper desktop-only" title="Controlled presentation scenario">
             <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 600 }}>{t('demoPresetLabel')}</span>
             <select
               className="village-select"
@@ -56,9 +56,9 @@ export default function Navbar({ activeScreen, setActiveScreen }) {
           {/* Language Selector */}
           <LanguageSelector />
 
-          {/* Farmer Weather Report Quick Action */}
+          {/* Farmer Weather Report Quick Action (Desktop only; on mobile accessible via sticky bottom nav) */}
           <button
-            className={`btn-primary btn-report-weather ${activeScreen === 'report' ? 'active' : ''}`}
+            className={`btn-primary btn-report-weather desktop-only ${activeScreen === 'report' ? 'active' : ''}`}
             onClick={() => setActiveScreen('report')}
             title={t('btnReportWeather')}
           >
@@ -68,7 +68,7 @@ export default function Navbar({ activeScreen, setActiveScreen }) {
           {/* Refresh button */}
           <button
             onClick={refresh}
-            className="refresh-btn"
+            className="refresh-btn desktop-only"
             title="Refresh live telemetry"
           >
             <RefreshCw size={13} />
@@ -115,6 +115,7 @@ export default function Navbar({ activeScreen, setActiveScreen }) {
                   {user.name}
                 </span>
                 <span
+                  className="desktop-only"
                   style={{
                     fontSize: '0.62rem',
                     fontWeight: 800,
@@ -129,6 +130,7 @@ export default function Navbar({ activeScreen, setActiveScreen }) {
                   {user.role === 'officer' ? 'Officer' : 'Farmer'}
                 </span>
                 <span
+                  className="desktop-only"
                   style={{
                     fontSize: '0.65rem',
                     fontWeight: 700,

@@ -4,7 +4,7 @@ import TransparencyBadge from './TransparencyBadge';
 import { useWeather } from '../context/WeatherContext';
 import { WeatherConditionBadge } from '../utils/weatherIcons';
 
-export default function WeatherCards({ currentWeather }) {
+function WeatherCards({ currentWeather }) {
   const { t, getConditionLabel } = useWeather();
   if (!currentWeather) {
     return (
@@ -92,3 +92,5 @@ export default function WeatherCards({ currentWeather }) {
     </div>
   );
 }
+
+export default React.memo(WeatherCards);

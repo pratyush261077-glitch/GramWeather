@@ -206,6 +206,7 @@ export default function LocationChamberModal() {
         ) : (
           /* 3 Chambers Grid */
         <div
+          className="chambers-grid"
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',

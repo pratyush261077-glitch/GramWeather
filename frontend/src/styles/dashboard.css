@@ -540,6 +540,8 @@
   animation: radar-sweep 5s linear infinite;
   pointer-events: none;
   z-index: 2;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 /* Radar Range Concentric Rings */
@@ -616,15 +618,16 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, border-color 0.2s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   z-index: 12;
   user-select: none;
+  will-change: transform;
 }
 
 .compass-node:hover, .compass-node.active {
   background: rgba(16, 45, 36, 0.98);
-  transform: scale(1.15);
+  transform: scale(1.15) translateZ(0);
   box-shadow: 0 0 18px rgba(16, 185, 129, 0.5), 0 4px 14px rgba(0, 0, 0, 0.7);
   z-index: 25;
 }
@@ -1224,5 +1227,330 @@
   padding-top: 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   font-size: 0.73rem;
+}
+
+/* ==========================================================================
+   PHASE C: MOBILE RESPONSIVENESS & BOTTOM NAVIGATION (360px - Desktop)
+   ========================================================================== */
+
+/* Responsive visibility utilities */
+.desktop-only {
+  display: flex !important;
+}
+.mobile-only {
+  display: none !important;
+}
+
+/* Default state for mobile bottom nav on desktop */
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+  .mobile-only {
+    display: flex !important;
+  }
+
+  /* Prevent iOS zoom on form inputs */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+
+  /* Compact top header on mobile */
+  .navbar {
+    padding: 8px 12px !important;
+    gap: 0 !important;
+  }
+
+  .navbar-top-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .brand-section {
+    gap: 8px !important;
+  }
+
+  .brand-logo {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  .brand-title {
+    font-size: 0.95rem !important;
+  }
+
+  .brand-subtitle {
+    display: none !important;
+  }
+
+  .nav-controls {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  /* Hide top desktop tab bar on mobile */
+  .navbar-bottom-row {
+    display: none !important;
+  }
+
+  /* Sticky Mobile Bottom Navigation Bar (Thumb-friendly with 44x44px min touch targets) */
+  .mobile-bottom-nav {
+    display: block !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    background: rgba(9, 21, 18, 0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(16, 185, 129, 0.25);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+    padding: 6px 4px max(8px, env(safe-area-inset-bottom, 8px));
+  }
+
+  .mobile-bottom-nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 540px;
+    margin: 0 auto;
+  }
+
+  .mobile-nav-btn {
+    flex: 1;
+    min-height: 48px;
+    min-width: 44px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: 4px 2px;
+    gap: 3px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.15s ease;
+    border-radius: 8px;
+    position: relative;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-nav-btn:active {
+    transform: scale(0.94);
+    background: rgba(16, 185, 129, 0.1);
+  }
+
+  .mobile-nav-btn.active {
+    color: #34d399;
+  }
+
+  .mobile-nav-icon-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 22px;
+  }
+
+  .mobile-nav-indicator {
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px;
+    height: 2.5px;
+    background: #10b981;
+    border-radius: 2px;
+    box-shadow: 0 0 6px #10b981;
+  }
+
+  .mobile-nav-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+
+  .mobile-nav-btn.special-action {
+    color: #fff;
+  }
+
+  .mobile-nav-btn.special-action .mobile-nav-icon-wrap {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4);
+    margin-top: -8px;
+  }
+
+  .mobile-nav-btn.special-action.active .mobile-nav-icon-wrap {
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.7);
+  }
+
+  /* Safe content area padding so content is never hidden behind bottom nav */
+  .main-content {
+    padding-bottom: 84px !important;
+  }
+
+  footer {
+    margin-bottom: 74px !important;
+    padding: 12px 16px !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    text-align: center !important;
+  }
+
+  /* Dashboard Stack & Grid */
+  .dashboard-content {
+    padding: 12px 10px !important;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .village-header-bar {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 12px !important;
+    gap: 10px !important;
+  }
+
+  /* Weather Hero Card */
+  .weather-hero-card {
+    padding: 18px 14px !important;
+  }
+
+  .hero-temp-row {
+    gap: 14px !important;
+  }
+
+  .temp-large {
+    font-size: 3.8rem !important;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  /* Direction Compass Radar Mobile Fitting */
+  .compass-card {
+    padding: 16px 10px !important;
+    overflow: hidden !important;
+  }
+
+  .compass-container {
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .compass-dial {
+    transform: scale(0.92);
+    transform-origin: center center;
+    margin: -10px auto;
+  }
+
+  /* Report Weather Mobile Enhancements */
+  .report-input-modes-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .report-input-modes-grid button {
+    min-height: 54px !important;
+    flex-direction: row !important;
+    padding: 12px 16px !important;
+    justify-content: flex-start !important;
+    gap: 14px !important;
+    text-align: left !important;
+  }
+
+  .event-grid-buttons {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .btn-event-option {
+    min-height: 52px !important;
+    padding: 10px 8px !important;
+    font-size: 0.86rem !important;
+  }
+
+  /* Monsoon 4 Cards Stacking */
+  .monsoon-cards-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  /* Location Chamber Modal on Mobile */
+  .chambers-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    max-height: 55vh !important;
+    overflow-y: auto !important;
+  }
+
+  .chamber-column button {
+    min-height: 44px !important;
+  }
+}
+
+/* Extra small screens (320px - 400px budget Android phones) */
+@media (max-width: 400px) {
+  .compass-dial {
+    transform: scale(0.85);
+    margin: -20px auto;
+  }
+
+  .temp-large {
+    font-size: 3.2rem !important;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+  }
+
+  .metric-pill {
+    padding: 8px !important;
+  }
+
+  .metric-val {
+    font-size: 1.1rem !important;
+  }
+
+  .chamber-breadcrumbs {
+    font-size: 0.68rem !important;
+  }
+}
+
+@media (max-width: 350px) {
+  .compass-dial {
+    transform: scale(0.76);
+    margin: -32px auto;
+  }
+
+  .temp-large {
+    font-size: 2.8rem !important;
+  }
 }
 

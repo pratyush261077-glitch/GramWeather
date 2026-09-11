@@ -4,6 +4,97 @@ import { fetchMonsoonOutlook, fetchMonsoonBacktest } from '../services/monsoonAP
 import { CloudRain, Droplets, Sprout, ShieldCheck, AlertTriangle, RefreshCw, Info, MapPin, ChevronDown, ChevronUp, Copy, Check } from '../components/icons';
 import TransparencyBadge from '../components/TransparencyBadge';
 
+// Predefined states matching user requirements (defined outside to avoid re-allocations on render)
+const DEMO_PRESETS = {
+  approaching: {
+    onset_status: 'APPROACHING',
+    phase: 'PRE_MONSOON',
+    onset_window: { start: '2026-06-25', end: '2026-07-05', label: 'Jun 25 – Jul 5' },
+    climatological_onset: { date: '2026-06-28', window_days: 7 },
+    detected_onset: null,
+    break_risk_7d: 'LOW',
+    forecast_7d_rain_mm: 45.0,
+    dry_spell_index_7d_mm: 1.2,
+    confidence_pct: 72,
+    confidence_basis: [
+      'Pre-monsoon trough advancing northwestward (+25)',
+      'Convective precipitation cluster within 150 km radius (+25)',
+      'Multi-model ensemble signals onset within 7-day window (+22)'
+    ],
+    forecast_7d: [
+      { date: 'Day 1', precipitation_sum: 4.5 },
+      { date: 'Day 2', precipitation_sum: 8.2 },
+      { date: 'Day 3', precipitation_sum: 12.0 },
+      { date: 'Day 4', precipitation_sum: 10.5 },
+      { date: 'Day 5', precipitation_sum: 5.8 },
+      { date: 'Day 6', precipitation_sum: 2.5 },
+      { date: 'Day 7', precipitation_sum: 1.5 },
+    ],
+    advisory: {
+      sowing: "Onset approaching with substantial pre-monsoon showers (~45 mm expected). Complete field bunding and procure certified seed for timely sowing.",
+      irrigation: "Reduce or pause irrigation as pre-monsoon wetting begins across the village micro-catchment."
+    }
+  },
+  active: {
+    onset_status: 'DECLARED',
+    phase: 'ACTIVE_MONSOON',
+    onset_window: { start: '2026-06-21', end: '2026-07-02', label: 'Jun 21 – Jul 2' },
+    climatological_onset: { date: '2026-06-28', window_days: 7 },
+    detected_onset: '2026-06-27',
+    break_risk_7d: 'MODERATE',
+    forecast_7d_rain_mm: 22.0,
+    dry_spell_index_7d_mm: 3.5,
+    confidence_pct: 85,
+    confidence_basis: [
+      'Pai et al. threshold met: 5-day rain cumulative > 40 mm (+35)',
+      'Westerlies depth established up to 500 hPa (+30)',
+      'Surface relative humidity sustained above 70% (+20)'
+    ],
+    forecast_7d: [
+      { date: 'Day 1', precipitation_sum: 6.2 },
+      { date: 'Day 2', precipitation_sum: 5.0 },
+      { date: 'Day 3', precipitation_sum: 4.1 },
+      { date: 'Day 4', precipitation_sum: 3.2 },
+      { date: 'Day 5', precipitation_sum: 2.0 },
+      { date: 'Day 6', precipitation_sum: 1.0 },
+      { date: 'Day 7', precipitation_sum: 0.5 },
+    ],
+    advisory: {
+      sowing: "Monsoon declared active. Soil moisture profile optimal. Proceed with standard Kharif sowing according to block schedule.",
+      irrigation: "Maintain regular irrigation intervals as needed; supplement with tube-well during moderate dry intervals."
+    }
+  },
+  break_risk: {
+    onset_status: 'ACTIVE',
+    phase: 'BREAK_SPELL',
+    onset_window: { start: '2026-06-21', end: '2026-07-02', label: 'Jun 21 – Jul 2' },
+    climatological_onset: { date: '2026-06-28', window_days: 7 },
+    detected_onset: '2026-06-27',
+    break_risk_7d: 'HIGH',
+    forecast_7d_rain_mm: 6.0,
+    dry_spell_index_7d_mm: 8.4,
+    confidence_pct: 88,
+    confidence_basis: [
+      'Monsoon trough shifted north toward Himalayan foothills (+35)',
+      '7-day rainfall forecast collapses below 10 mm threshold (+35)',
+      'Mid-tropospheric anticyclone encroaching Northwest India (+18)'
+    ],
+    forecast_7d: [
+      { date: 'Day 1', precipitation_sum: 2.0 },
+      { date: 'Day 2', precipitation_sum: 1.5 },
+      { date: 'Day 3', precipitation_sum: 1.0 },
+      { date: 'Day 4', precipitation_sum: 0.5 },
+      { date: 'Day 5', precipitation_sum: 0.5 },
+      { date: 'Day 6', precipitation_sum: 0.3 },
+      { date: 'Day 7', precipitation_sum: 0.2 },
+    ],
+    advisory: {
+      sowing: "Monsoon active but extended dry break spell (<10 mm rain / 7d) detected. Pause fresh transplantation and preserve field bund moisture.",
+      irrigation: "Monsoon break likely, plan irrigation backup. Activate auxiliary tube-well or community pond storage immediately."
+    }
+  }
+};
+
 export default function Monsoon({ onNavigate }) {
   const {
     selectedVillage,
@@ -33,97 +124,6 @@ export default function Monsoon({ onNavigate }) {
   const blockName = selectedVillage?.block || selectedVillage?.district || 'Khanna';
   const stateName = selectedVillage?.state || 'Punjab';
 
-  // Predefined states matching user requirements
-  const DEMO_PRESETS = {
-    approaching: {
-      onset_status: 'APPROACHING',
-      phase: 'PRE_MONSOON',
-      onset_window: { start: '2026-06-25', end: '2026-07-05', label: 'Jun 25 – Jul 5' },
-      climatological_onset: { date: '2026-06-28', window_days: 7 },
-      detected_onset: null,
-      break_risk_7d: 'LOW',
-      forecast_7d_rain_mm: 45.0,
-      dry_spell_index_7d_mm: 1.2,
-      confidence_pct: 72,
-      confidence_basis: [
-        'Pre-monsoon trough advancing northwestward (+25)',
-        'Convective precipitation cluster within 150 km radius (+25)',
-        'Multi-model ensemble signals onset within 7-day window (+22)'
-      ],
-      forecast_7d: [
-        { date: 'Day 1', precipitation_sum: 4.5 },
-        { date: 'Day 2', precipitation_sum: 8.2 },
-        { date: 'Day 3', precipitation_sum: 12.0 },
-        { date: 'Day 4', precipitation_sum: 10.5 },
-        { date: 'Day 5', precipitation_sum: 5.8 },
-        { date: 'Day 6', precipitation_sum: 2.5 },
-        { date: 'Day 7', precipitation_sum: 1.5 },
-      ],
-      advisory: {
-        sowing: "Onset approaching with substantial pre-monsoon showers (~45 mm expected). Complete field bunding and procure certified seed for timely sowing.",
-        irrigation: "Reduce or pause irrigation as pre-monsoon wetting begins across the village micro-catchment."
-      }
-    },
-    active: {
-      onset_status: 'DECLARED',
-      phase: 'ACTIVE_MONSOON',
-      onset_window: { start: '2026-06-21', end: '2026-07-02', label: 'Jun 21 – Jul 2' },
-      climatological_onset: { date: '2026-06-28', window_days: 7 },
-      detected_onset: '2026-06-27',
-      break_risk_7d: 'MODERATE',
-      forecast_7d_rain_mm: 22.0,
-      dry_spell_index_7d_mm: 3.5,
-      confidence_pct: 85,
-      confidence_basis: [
-        'Pai et al. threshold met: 5-day rain cumulative > 40 mm (+35)',
-        'Westerlies depth established up to 500 hPa (+30)',
-        'Surface relative humidity sustained above 70% (+20)'
-      ],
-      forecast_7d: [
-        { date: 'Day 1', precipitation_sum: 6.2 },
-        { date: 'Day 2', precipitation_sum: 5.0 },
-        { date: 'Day 3', precipitation_sum: 4.1 },
-        { date: 'Day 4', precipitation_sum: 3.2 },
-        { date: 'Day 5', precipitation_sum: 2.0 },
-        { date: 'Day 6', precipitation_sum: 1.0 },
-        { date: 'Day 7', precipitation_sum: 0.5 },
-      ],
-      advisory: {
-        sowing: "Monsoon declared active. Soil moisture profile optimal. Proceed with standard Kharif sowing according to block schedule.",
-        irrigation: "Maintain regular irrigation intervals as needed; supplement with tube-well during moderate dry intervals."
-      }
-    },
-    break_risk: {
-      onset_status: 'ACTIVE',
-      phase: 'BREAK_SPELL',
-      onset_window: { start: '2026-06-21', end: '2026-07-02', label: 'Jun 21 – Jul 2' },
-      climatological_onset: { date: '2026-06-28', window_days: 7 },
-      detected_onset: '2026-06-27',
-      break_risk_7d: 'HIGH',
-      forecast_7d_rain_mm: 6.0,
-      dry_spell_index_7d_mm: 8.4,
-      confidence_pct: 88,
-      confidence_basis: [
-        'Monsoon trough shifted north toward Himalayan foothills (+35)',
-        '7-day rainfall forecast collapses below 10 mm threshold (+35)',
-        'Mid-tropospheric anticyclone encroaching Northwest India (+18)'
-      ],
-      forecast_7d: [
-        { date: 'Day 1', precipitation_sum: 2.0 },
-        { date: 'Day 2', precipitation_sum: 1.5 },
-        { date: 'Day 3', precipitation_sum: 1.0 },
-        { date: 'Day 4', precipitation_sum: 0.5 },
-        { date: 'Day 5', precipitation_sum: 0.5 },
-        { date: 'Day 6', precipitation_sum: 0.3 },
-        { date: 'Day 7', precipitation_sum: 0.2 },
-      ],
-      advisory: {
-        sowing: "Monsoon active but extended dry break spell (<10 mm rain / 7d) detected. Pause fresh transplantation and preserve field bund moisture.",
-        irrigation: "Monsoon break likely, plan irrigation backup. Activate auxiliary tube-well or community pond storage immediately."
-      }
-    }
-  };
-
   const handleSelectPreset = async (mode) => {
     setPresetMode(mode);
     if (mode === 'break_risk') {
@@ -139,6 +139,8 @@ export default function Monsoon({ onNavigate }) {
 
   useEffect(() => {
     let isMounted = true;
+    const controller = new AbortController();
+
     async function loadData() {
       setLoading(true);
       const cacheKeyOutlook = `gw_monsoon_${villageId}`;
@@ -165,35 +167,37 @@ export default function Monsoon({ onNavigate }) {
 
       try {
         const [outlookRes, backtestRes] = await Promise.allSettled([
-          fetchMonsoonOutlook(villageId),
-          fetchMonsoonBacktest(villageId),
+          fetchMonsoonOutlook(villageId, { signal: controller.signal }),
+          fetchMonsoonBacktest(villageId, { signal: controller.signal }),
         ]);
-        if (isMounted) {
-          if (outlookRes.status === 'fulfilled' && outlookRes.value) {
-            setOutlook(outlookRes.value);
-            setIsMonsoonCached(false);
-            try {
-              localStorage.setItem(cacheKeyOutlook, JSON.stringify(outlookRes.value));
-            } catch {}
-          } else {
-            const cOutlook = localStorage.getItem(cacheKeyOutlook);
-            if (cOutlook) {
-              setOutlook(JSON.parse(cOutlook));
-              setIsMonsoonCached(true);
-            }
-          }
 
-          if (backtestRes.status === 'fulfilled' && backtestRes.value) {
-            setBacktest(backtestRes.value);
-            try {
-              localStorage.setItem(cacheKeyBacktest, JSON.stringify(backtestRes.value));
-            } catch {}
-          } else {
-            const cBacktest = localStorage.getItem(cacheKeyBacktest);
-            if (cBacktest) setBacktest(JSON.parse(cBacktest));
+        if (!isMounted || controller.signal.aborted) return;
+
+        if (outlookRes.status === 'fulfilled' && outlookRes.value) {
+          setOutlook(outlookRes.value);
+          setIsMonsoonCached(false);
+          try {
+            localStorage.setItem(cacheKeyOutlook, JSON.stringify(outlookRes.value));
+          } catch {}
+        } else {
+          const cOutlook = localStorage.getItem(cacheKeyOutlook);
+          if (cOutlook) {
+            setOutlook(JSON.parse(cOutlook));
+            setIsMonsoonCached(true);
           }
         }
+
+        if (backtestRes.status === 'fulfilled' && backtestRes.value) {
+          setBacktest(backtestRes.value);
+          try {
+            localStorage.setItem(cacheKeyBacktest, JSON.stringify(backtestRes.value));
+          } catch {}
+        } else {
+          const cBacktest = localStorage.getItem(cacheKeyBacktest);
+          if (cBacktest) setBacktest(JSON.parse(cBacktest));
+        }
       } catch (err) {
+        if (controller.signal.aborted) return;
         console.error('Failed to load monsoon data, falling back to cache:', err);
         const cOutlook = localStorage.getItem(cacheKeyOutlook);
         if (cOutlook && isMounted) {
@@ -201,11 +205,14 @@ export default function Monsoon({ onNavigate }) {
           setIsMonsoonCached(true);
         }
       } finally {
-        if (isMounted) setLoading(false);
+        if (isMounted && !controller.signal.aborted) setLoading(false);
       }
     }
     loadData();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, [villageId, simulateNetworkDrop]);
 
   const handleToggleBacktest = async () => {

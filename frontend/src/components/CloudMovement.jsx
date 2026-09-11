@@ -3,7 +3,7 @@ import { Wind, CloudRain } from './icons';
 import TransparencyBadge from './TransparencyBadge';
 import { useWeather } from '../context/WeatherContext';
 
-export default function CloudMovement({ cloudMovement, currentWindSpeed, currentCloudCover }) {
+function CloudMovement({ cloudMovement, currentWindSpeed, currentCloudCover }) {
   const { t, language } = useWeather();
   const fromDir = cloudMovement?.from_direction || 'NW';
   const toDir = cloudMovement?.to_direction || 'SE';
@@ -87,3 +87,5 @@ export default function CloudMovement({ cloudMovement, currentWindSpeed, current
     </div>
   );
 }
+
+export default React.memo(CloudMovement);

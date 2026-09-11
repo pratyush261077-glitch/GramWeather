@@ -36,6 +36,60 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_AUDIO_SIZE = 8 * 1024 * 1024; // 8MB
 const MAX_RECORD_SECONDS = 15;
 
+/**
+ * Client-side photo compression using HTML5 Canvas.
+ * Caps dimension to max 1280px and applies 0.8 JPEG compression.
+ */
+async function compressImage(file, maxWidth = 1280, maxHeight = 1280, quality = 0.8) {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined' || typeof document === 'undefined' || !file.type.startsWith('image/')) {
+      return resolve(file);
+    }
+
+    const reader = new FileReader();
+    reader.onload = (readerEvent) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth || height > maxHeight) {
+          if (width > height) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) return resolve(file);
+            const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
+            resolve(compressedFile);
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = () => resolve(file);
+      img.src = readerEvent.target.result;
+    };
+    reader.onerror = () => resolve(file);
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function ReportWeather({ onClose, onInspectObservation }) {
   const {
     selectedVillage,
@@ -135,30 +189,41 @@ export default function ReportWeather({ onClose, onInspectObservation }) {
   };
 
   // 1. Photo Capture Handler (<input capture="environment" /> opens phone camera directly)
-  const handleImageCapture = (e) => {
+  const handleImageCapture = async (e) => {
     setMediaError('');
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const rawFile = e.target.files?.[0];
+    if (!rawFile) return;
 
-    const ext = file.name.split('.').pop().toLowerCase();
+    const ext = rawFile.name.split('.').pop().toLowerCase();
     const validExts = ['jpg', 'jpeg', 'png', 'webp'];
 
-    if (!validExts.includes(ext) && !file.type.startsWith('image/')) {
+    if (!validExts.includes(ext) && !rawFile.type.startsWith('image/')) {
       setMediaError('Invalid image format. Please capture a JPG, PNG, or WebP photo.');
       return;
     }
-    if (file.size > MAX_IMAGE_SIZE) {
-      setMediaError(`Photo size (${(file.size / (1024 * 1024)).toFixed(1)}MB) exceeds 5MB limit.`);
-      return;
-    }
 
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
-    setActiveInputMode('photo');
+    try {
+      // Client-side canvas compression: max 1280px, quality 0.8
+      const compressed = await compressImage(rawFile, 1280, 1280, 0.8);
+      if (compressed.size > MAX_IMAGE_SIZE) {
+        setMediaError(`Photo size (${(compressed.size / (1024 * 1024)).toFixed(1)}MB) exceeds 5MB limit.`);
+        return;
+      }
 
-    // Automatically stamp geolocation upon taking a photo
-    if (!geoLocation.isGps) {
-      acquireLocation();
+      setImageFile(compressed);
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+      setImagePreview(URL.createObjectURL(compressed));
+      setActiveInputMode('photo');
+
+      // Automatically stamp geolocation upon taking a photo
+      if (!geoLocation.isGps) {
+        acquireLocation();
+      }
+    } catch (err) {
+      console.warn('Image compression fallback:', err);
+      setImageFile(rawFile);
+      setImagePreview(URL.createObjectURL(rawFile));
+      setActiveInputMode('photo');
     }
   };
 
@@ -459,6 +524,8 @@ export default function ReportWeather({ onClose, onInspectObservation }) {
                     <img
                       src={createdObservation.image_url}
                       alt="Submitted field observation"
+                      loading="lazy"
+                      decoding="async"
                       style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '4px' }}
                     />
                   </div>
@@ -601,7 +668,7 @@ export default function ReportWeather({ onClose, onInspectObservation }) {
               style={{ display: 'none' }}
             />
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+            <div className="report-input-modes-grid">
               {/* BIG BUTTON 1: VOICE (PHONE MIC) */}
               <button
                 type="button"
@@ -772,7 +839,13 @@ export default function ReportWeather({ onClose, onInspectObservation }) {
           {imagePreview && (
             <div style={{ background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: '6px', padding: '10px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <img src={imagePreview} alt="Field preview" style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #38bdf8' }} />
+                <img
+                  src={imagePreview}
+                  alt="Field preview"
+                  loading="lazy"
+                  decoding="async"
+                  style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #38bdf8' }}
+                />
                 <div>
                   <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#fff' }}>Photo: user-uploaded, time & location stamped</div>
                   <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '2px' }}>

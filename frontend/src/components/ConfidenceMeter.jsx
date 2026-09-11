@@ -3,7 +3,7 @@ import { ShieldCheck, Eye } from './icons';
 import TransparencyBadge from './TransparencyBadge';
 import { useWeather } from '../context/WeatherContext';
 
-export default function ConfidenceMeter({ confidenceScore, verificationStatus, sensorsOnlineCount, observationsCount }) {
+function ConfidenceMeter({ confidenceScore, verificationStatus, sensorsOnlineCount, observationsCount }) {
   const { t } = useWeather();
   const score = Math.round(confidenceScore || 82);
   const status = verificationStatus || (score >= 75 ? 'VERIFIED' : 'MODERATE');
@@ -59,3 +59,5 @@ export default function ConfidenceMeter({ confidenceScore, verificationStatus, s
     </div>
   );
 }
+
+export default React.memo(ConfidenceMeter);

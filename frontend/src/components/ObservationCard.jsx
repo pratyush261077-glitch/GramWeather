@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Eye, CheckCircle2, AlertTriangle, XCircle, Camera, Volume2 } from './icons';
 import { useWeather } from '../context/WeatherContext';
 
-export default function ObservationCard({ observation, onVerify }) {
+function ObservationCard({ observation, onVerify }) {
   const { t, getConditionLabel, getIntensityLabel, getStatusLabel, getTimeLabel, translateText } = useWeather();
   const [showFullImage, setShowFullImage] = useState(false);
 
@@ -90,6 +90,8 @@ export default function ObservationCard({ observation, onVerify }) {
               <img
                 src={observation.image_url}
                 alt="Farmer field report"
+                loading="lazy"
+                decoding="async"
                 onClick={() => setShowFullImage(true)}
                 style={{
                   width: '100%',
@@ -149,6 +151,8 @@ export default function ObservationCard({ observation, onVerify }) {
             <img
               src={observation.image_url}
               alt="Enlarged field report"
+              loading="lazy"
+              decoding="async"
               style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain', borderRadius: '4px' }}
             />
             <span style={{ fontSize: '0.7rem', color: '#fbbf24' }}>
@@ -186,3 +190,5 @@ export default function ObservationCard({ observation, onVerify }) {
     </div>
   );
 }
+
+export default React.memo(ObservationCard);

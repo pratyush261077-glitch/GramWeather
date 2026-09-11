@@ -8,67 +8,67 @@ import { Zap, AlertTriangle, CheckCircle2, Droplets } from './icons';
  * Translates raw 8-direction radar sweep telemetry into high-contrast,
  * immediate agricultural advisories matching the app's glassmorphic dark UI.
  */
-export default function NowcastInsights({ alerts = null }) {
-  const defaultInsights = [
-    {
-      id: 'alert-1',
-      category: 'URGENT',
-      severity: 'urgent',
-      icon: <AlertTriangle size={16} color="#ef4444" />,
-      time: 'Now / +111 mins',
-      title: 'Rain Cell Approaching from SW',
-      message: 'Rain cell approaching from SW. Pause pesticide spraying immediately to prevent chemical wash-off.',
-      action: 'Pause spraying & secure open produce',
-      radarMeta: 'Verified: Radar Sweep + Farmer Report from SW',
-      accentColor: '#ef4444',
-      badgeBg: 'rgba(239, 68, 68, 0.18)',
-      badgeBorder: 'rgba(239, 68, 68, 0.4)',
-    },
-    {
-      id: 'alert-2',
-      category: 'OPTIMAL',
-      severity: 'optimal',
-      icon: <CheckCircle2 size={16} color="#10b981" />,
-      time: 'Next 4 Hours',
-      title: 'Optimal Harvesting Window',
-      message: 'Atmospheric window stable. Safe for harvesting wheat.',
-      action: 'Safe window for wheat combine operations',
-      radarMeta: 'Verified: Radar Clear + Ground Consensus',
-      accentColor: '#10b981',
-      badgeBg: 'rgba(16, 185, 129, 0.18)',
-      badgeBorder: 'rgba(16, 185, 129, 0.4)',
-    },
-    {
-      id: 'alert-3',
-      category: 'PREDICTIVE RISK',
-      severity: 'warning',
-      icon: <AlertTriangle size={16} color="#f59e0b" />,
-      time: 'Tomorrow',
-      title: 'Fungal Blight Risk',
-      message: 'High SE winds + 74% humidity increases risk of fungal blight. Scout fields.',
-      action: 'Field scouting recommended at morning dew',
-      radarMeta: 'Verified: SE Radar Inflow + IoT Mesh Telemetry',
-      accentColor: '#f59e0b',
-      badgeBg: 'rgba(245, 158, 11, 0.18)',
-      badgeBorder: 'rgba(245, 158, 11, 0.4)',
-    },
-    {
-      id: 'alert-4',
-      category: 'RESOURCE EFFICIENCY',
-      severity: 'resource',
-      icon: <Droplets size={16} color="#38bdf8" />,
-      time: 'Next 24-48 Hours',
-      title: 'Canal Irrigation Advisory',
-      message: 'Soil moisture retention high following precipitation. Defer canal irrigation to conserve tubewell electricity.',
-      action: 'Conserve tubewell electricity & avoid waterlogging',
-      radarMeta: 'Verified: Soil Infiltration + Citizen Reports',
-      accentColor: '#38bdf8',
-      badgeBg: 'rgba(56, 189, 248, 0.18)',
-      badgeBorder: 'rgba(56, 189, 248, 0.4)',
-    },
-  ];
+const DEFAULT_INSIGHTS = [
+  {
+    id: 'alert-1',
+    category: 'URGENT',
+    severity: 'urgent',
+    icon: <AlertTriangle size={16} color="#ef4444" />,
+    time: 'Now / +111 mins',
+    title: 'Rain Cell Approaching from SW',
+    message: 'Rain cell approaching from SW. Pause pesticide spraying immediately to prevent chemical wash-off.',
+    action: 'Pause spraying & secure open produce',
+    radarMeta: 'Verified: Radar Sweep + Farmer Report from SW',
+    accentColor: '#ef4444',
+    badgeBg: 'rgba(239, 68, 68, 0.18)',
+    badgeBorder: 'rgba(239, 68, 68, 0.4)',
+  },
+  {
+    id: 'alert-2',
+    category: 'OPTIMAL',
+    severity: 'optimal',
+    icon: <CheckCircle2 size={16} color="#10b981" />,
+    time: 'Next 4 Hours',
+    title: 'Optimal Harvesting Window',
+    message: 'Atmospheric window stable. Safe for harvesting wheat.',
+    action: 'Safe window for wheat combine operations',
+    radarMeta: 'Verified: Radar Clear + Ground Consensus',
+    accentColor: '#10b981',
+    badgeBg: 'rgba(16, 185, 129, 0.18)',
+    badgeBorder: 'rgba(16, 185, 129, 0.4)',
+  },
+  {
+    id: 'alert-3',
+    category: 'PREDICTIVE RISK',
+    severity: 'warning',
+    icon: <AlertTriangle size={16} color="#f59e0b" />,
+    time: 'Tomorrow',
+    title: 'Fungal Blight Risk',
+    message: 'High SE winds + 74% humidity increases risk of fungal blight. Scout fields.',
+    action: 'Field scouting recommended at morning dew',
+    radarMeta: 'Verified: SE Radar Inflow + IoT Mesh Telemetry',
+    accentColor: '#f59e0b',
+    badgeBg: 'rgba(245, 158, 11, 0.18)',
+    badgeBorder: 'rgba(245, 158, 11, 0.4)',
+  },
+  {
+    id: 'alert-4',
+    category: 'RESOURCE EFFICIENCY',
+    severity: 'resource',
+    icon: <Droplets size={16} color="#38bdf8" />,
+    time: 'Next 24-48 Hours',
+    title: 'Canal Irrigation Advisory',
+    message: 'Soil moisture retention high following precipitation. Defer canal irrigation to conserve tubewell electricity.',
+    action: 'Conserve tubewell electricity & avoid waterlogging',
+    radarMeta: 'Verified: Soil Infiltration + Citizen Reports',
+    accentColor: '#38bdf8',
+    badgeBg: 'rgba(56, 189, 248, 0.18)',
+    badgeBorder: 'rgba(56, 189, 248, 0.4)',
+  },
+];
 
-  const items = alerts || defaultInsights;
+function NowcastInsights({ alerts = null }) {
+  const items = alerts || DEFAULT_INSIGHTS;
 
   return (
     <div className="glass-panel nowcast-card animate-fade-in">
@@ -167,3 +167,5 @@ export default function NowcastInsights({ alerts = null }) {
     </div>
   );
 }
+
+export default React.memo(NowcastInsights);

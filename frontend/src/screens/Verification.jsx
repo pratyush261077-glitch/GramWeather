@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useWeather } from '../context/WeatherContext';
 import { ShieldCheck, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Camera, Volume2 } from '../components/icons';
 import TransparencyBadge from '../components/TransparencyBadge';
@@ -24,6 +24,7 @@ export default function Verification({ inspectTarget }) {
   const [verificationData, setVerificationData] = useState(latestVerification || null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [selectedMediaZoom, setSelectedMediaZoom] = useState(null);
+  const abortControllerRef = useRef(null);
 
   useEffect(() => {
     if (inspectTarget) {
@@ -33,19 +34,39 @@ export default function Verification({ inspectTarget }) {
     }
   }, [inspectTarget, observations, activeObservation]);
 
-  // Trigger verification whenever observation or scenario changes
+  // Trigger verification whenever observation or scenario changes with AbortController
   const runVerificationNow = async (obs, scenarioChoice) => {
     if (!obs) return;
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setIsVerifying(true);
     try {
-      const res = await verifyReport(obs, scenarioChoice);
-      setVerificationData(res);
+      const res = await verifyReport(obs, scenarioChoice, { signal: controller.signal });
+      if (!controller.signal.aborted) {
+        setVerificationData(res);
+      }
     } catch (err) {
-      console.error(err);
+      if (err.name !== 'AbortError') {
+        console.error('Verification error:', err);
+      }
     } finally {
-      setIsVerifying(false);
+      if (!controller.signal.aborted) {
+        setIsVerifying(false);
+      }
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (activeObservation) {
@@ -217,6 +238,8 @@ export default function Verification({ inspectTarget }) {
                   <img
                     src={activeObservation.image_url}
                     alt="Ground Photo"
+                    loading="lazy"
+                    decoding="async"
                     onClick={() => setSelectedMediaZoom(activeObservation.image_url)}
                     style={{
                       height: '110px',
@@ -244,46 +267,53 @@ export default function Verification({ inspectTarget }) {
 
         {/* Multi-Source Evidence Breakdown Table */}
         <div>
-          <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff', marginBottom: '12px' }}>
-            {t('evidenceMatrixTitle')}
-          </h4>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff', margin: 0 }}>
+              {t('evidenceMatrixTitle')}
+            </h4>
+            <span className="mobile-only" style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+              ↔ Swipe table
+            </span>
+          </div>
 
-          <table className="evidence-table">
-            <thead>
-              <tr>
-                <th>{t('colSource')}</th>
-                <th>{t('colTelemetry')}</th>
-                <th>{t('colConcordance')}</th>
-                <th>{t('colWeight')}</th>
-                <th>{t('colDetail')}</th>
-                <th>{t('colClass')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {verificationData?.evidence_breakdown?.map((ev, i) => (
-                <tr key={i}>
-                  <td style={{ fontWeight: 700, color: '#fff' }}>{ev.source_name}</td>
-                  <td style={{ color: 'var(--text-primary)' }}>{ev.reading}</td>
-                  <td>
-                    {ev.agrees ? (
-                      <span style={{ color: '#34d399', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 700 }}>
-                        <CheckCircle2 size={14} /> {t('agrees')}
-                      </span>
-                    ) : (
-                      <span style={{ color: '#f87171', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 700 }}>
-                        <XCircle size={14} /> {t('conflicts')}
-                      </span>
-                    )}
-                  </td>
-                  <td style={{ color: 'var(--text-secondary)' }}>{Math.round(ev.reliability_weight * 100)}%</td>
-                  <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{translateText(ev.detail)}</td>
-                  <td>
-                    <TransparencyBadge source={ev.is_simulated ? 'Simulated' : 'Live NWP'} isSimulated={ev.is_simulated} />
-                  </td>
+          <div className="table-responsive-wrapper" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', borderRadius: 'var(--radius-sm)' }}>
+            <table className="evidence-table">
+              <thead>
+                <tr>
+                  <th>{t('colSource')}</th>
+                  <th>{t('colTelemetry')}</th>
+                  <th>{t('colConcordance')}</th>
+                  <th>{t('colWeight')}</th>
+                  <th>{t('colDetail')}</th>
+                  <th>{t('colClass')}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {verificationData?.evidence_breakdown?.map((ev, i) => (
+                  <tr key={i}>
+                    <td style={{ fontWeight: 700, color: '#fff' }}>{ev.source_name}</td>
+                    <td style={{ color: 'var(--text-primary)' }}>{ev.reading}</td>
+                    <td>
+                      {ev.agrees ? (
+                        <span style={{ color: '#34d399', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 700 }}>
+                          <CheckCircle2 size={14} /> {t('agrees')}
+                        </span>
+                      ) : (
+                        <span style={{ color: '#f87171', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 700 }}>
+                          <XCircle size={14} /> {t('conflicts')}
+                        </span>
+                      )}
+                    </td>
+                    <td style={{ color: 'var(--text-secondary)' }}>{Math.round(ev.reliability_weight * 100)}%</td>
+                    <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{translateText(ev.detail)}</td>
+                    <td>
+                      <TransparencyBadge source={ev.is_simulated ? 'Simulated' : 'Live NWP'} isSimulated={ev.is_simulated} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
