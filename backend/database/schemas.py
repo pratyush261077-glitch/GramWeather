@@ -206,3 +206,42 @@ class LearningLoopRecord(BaseModel):
     logs: List[ForecastVerificationLogItem]
     citations: List[str]
 
+# =========================================================================
+# User Authentication Schemas
+# =========================================================================
+
+class UserSignupRequest(BaseModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    password: str = Field(..., min_length=4)
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    village: Optional[str] = None
+    state: Optional[str] = None
+    district: Optional[str] = None
+    block: Optional[str] = None
+    language: Optional[str] = "en"
+    role: Optional[str] = "farmer"  # "farmer" or "officer"
+
+class UserLoginRequest(BaseModel):
+    identifier: str = Field(..., description="Phone number or email address")
+    password: str
+
+class UserResponse(BaseModel):
+    id: str
+    name: str
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    village: Optional[str] = None
+    state: Optional[str] = None
+    district: Optional[str] = None
+    block: Optional[str] = None
+    language: str = "en"
+    role: str = "farmer"
+    created_at: str
+
+class AuthTokenResponse(BaseModel):
+    token: str
+    token_type: str = "bearer"
+    user: UserResponse
+
+

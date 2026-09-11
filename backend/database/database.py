@@ -50,7 +50,8 @@ def init_db():
         ("media_attached", "TEXT"),
         ("language", "TEXT"),
         ("latitude", "REAL"),
-        ("longitude", "REAL")
+        ("longitude", "REAL"),
+        ("user_id", "TEXT")
     ]
     for col_name, col_type in new_cols:
         if col_name not in existing_cols:
@@ -58,6 +59,26 @@ def init_db():
                 cursor.execute(f"ALTER TABLE observations ADD COLUMN {col_name} {col_type}")
             except Exception as e:
                 print(f"[DB Migration Warning] Could not add column {col_name}: {e}")
+
+    # Users table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            phone TEXT,
+            email TEXT,
+            village TEXT,
+            state TEXT,
+            district TEXT,
+            block TEXT,
+            language TEXT NOT NULL DEFAULT 'en',
+            role TEXT NOT NULL DEFAULT 'farmer',
+            password_hash TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        )
+    """)
+    cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email) WHERE email IS NOT NULL AND email != ''")
+    cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_phone ON users(phone) WHERE phone IS NOT NULL AND phone != ''")
     
     # Verification history table
     cursor.execute("""
@@ -113,13 +134,14 @@ def save_observation(obs_data: Dict[str, Any]) -> str:
 
     lat = obs_data.get("latitude") if obs_data.get("latitude") is not None else obs_data.get("lat")
     lon = obs_data.get("longitude") if obs_data.get("longitude") is not None else obs_data.get("lon")
+    user_id = obs_data.get("user_id")
 
     cursor.execute("""
         INSERT INTO observations (
             id, village_id, reporter_name, event, intensity, time_description,
             description, timestamp, status, confidence_score, source, is_simulated,
-            image_url, audio_url, media_attached, language, latitude, longitude
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            image_url, audio_url, media_attached, language, latitude, longitude, user_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         obs_id,
         obs_data.get("village_id", "khanna"),
@@ -138,7 +160,8 @@ def save_observation(obs_data: Dict[str, Any]) -> str:
         media_attached_str,
         obs_data.get("language", "en"),
         float(lat) if lat is not None else None,
-        float(lon) if lon is not None else None
+        float(lon) if lon is not None else None,
+        user_id
     ))
     conn.commit()
     conn.close()
@@ -173,6 +196,7 @@ def get_observations_for_village(village_id: str, limit: int = 20) -> List[Dict[
         r_keys = r.keys()
         img_url = r["image_url"] if "image_url" in r_keys else None
         aud_url = r["audio_url"] if "audio_url" in r_keys else None
+        user_id = r["user_id"] if "user_id" in r_keys else None
         
         media_attached = None
         if "media_attached" in r_keys and r["media_attached"]:
@@ -210,6 +234,7 @@ def get_observations_for_village(village_id: str, limit: int = 20) -> List[Dict[
             "longitude": r["longitude"] if "longitude" in r_keys else None,
             "lat": r["latitude"] if "latitude" in r_keys else None,
             "lon": r["longitude"] if "longitude" in r_keys else None,
+            "user_id": user_id
         })
     return results
 
@@ -238,3 +263,111 @@ def save_verification_result(result_data: Dict[str, Any]):
     ))
     conn.commit()
     conn.close()
+
+# =========================================================================
+# User Database Operations
+# =========================================================================
+
+def create_user_in_db(user_data: Dict[str, Any]) -> Dict[str, Any]:
+    init_db()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    user_id = user_data.get("id") or f"USR_{str(uuid.uuid4())[:8].upper()}"
+    created_at = user_data.get("created_at") or datetime.utcnow().isoformat()
+    
+    phone_val = user_data.get("phone")
+    if phone_val is not None:
+        phone_val = str(phone_val).strip()
+        if not phone_val:
+            phone_val = None
+
+    email_val = user_data.get("email")
+    if email_val is not None:
+        email_val = str(email_val).strip().lower()
+        if not email_val:
+            email_val = None
+
+    cursor.execute("""
+        INSERT INTO users (
+            id, name, phone, email, village, state, district, block,
+            language, role, password_hash, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        user_id,
+        user_data["name"],
+        phone_val,
+        email_val,
+        user_data.get("village"),
+        user_data.get("state"),
+        user_data.get("district"),
+        user_data.get("block"),
+        user_data.get("language", "en"),
+        user_data.get("role", "farmer"),
+        user_data["password_hash"],
+        created_at
+    ))
+    conn.commit()
+    conn.close()
+    
+    saved = dict(user_data)
+    saved["id"] = user_id
+    saved["phone"] = phone_val
+    saved["email"] = email_val
+    saved["created_at"] = created_at
+    return saved
+
+def get_user_by_id_db(user_id: str) -> Optional[Dict[str, Any]]:
+    if not user_id:
+        return None
+    init_db()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return dict(row)
+    return None
+
+def get_user_by_email_db(email: str) -> Optional[Dict[str, Any]]:
+    if not email:
+        return None
+    cleaned = str(email).strip().lower()
+    if not cleaned:
+        return None
+    init_db()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE LOWER(email) = ?", (cleaned,))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return dict(row)
+    return None
+
+def get_user_by_phone_db(phone: str) -> Optional[Dict[str, Any]]:
+    if not phone:
+        return None
+    cleaned = str(phone).strip()
+    if not cleaned:
+        return None
+    init_db()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE phone = ?", (cleaned,))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return dict(row)
+    return None
+
+def get_user_by_identifier_db(identifier: str) -> Optional[Dict[str, Any]]:
+    if not identifier:
+        return None
+    cleaned = str(identifier).strip()
+    # Check email first
+    user = get_user_by_email_db(cleaned)
+    if not user:
+        user = get_user_by_phone_db(cleaned)
+    return user
+

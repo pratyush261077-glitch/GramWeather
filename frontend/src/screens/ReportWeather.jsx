@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useWeather } from '../context/WeatherContext';
+import { useAuth } from '../context/AuthContext';
 import ObservationCard from '../components/ObservationCard';
 import {
   Sun,
@@ -47,11 +48,12 @@ export default function ReportWeather({ onClose, onInspectObservation }) {
     getVillageLabel,
     language
   } = useWeather();
+  const { user } = useAuth();
 
   const [selectedEvent, setSelectedEvent] = useState('Heavy Rain');
   const [intensity, setIntensity] = useState('Moderate');
   const [timeDesc, setTimeDesc] = useState('Just now');
-  const [reporterName, setReporterName] = useState('');
+  const [reporterName, setReporterName] = useState(() => user?.name || '');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -873,9 +875,16 @@ export default function ReportWeather({ onClose, onInspectObservation }) {
           {/* Farmer Name & Text Note Input */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div>
-              <label style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
-                Your Name / Farm ID
-              </label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                <label style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                  {user ? `Reported by: ${user.name}` : 'Your Name / Farm ID'}
+                </label>
+                {user && (
+                  <span style={{ fontSize: '0.68rem', color: '#34d399', fontWeight: 700 }}>
+                    ✓ Verified Account ({user.role === 'officer' ? 'Agri Officer' : 'Local Farmer'})
+                  </span>
+                )}
+              </div>
               <input
                 type="text"
                 placeholder={t('namePlaceholder') || 'e.g. Ramesh Patel, North Fields'}

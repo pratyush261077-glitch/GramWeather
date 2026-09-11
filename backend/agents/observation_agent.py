@@ -72,6 +72,7 @@ class ObservationAgent:
             "confidence_score": 50.0,
             "confidence": 50.0,
             "source": "farmer",
-            "is_simulated": bool(raw_data.get("is_simulated", False))
+            "is_simulated": bool(raw_data.get("is_simulated", False)),
+            "user_id": raw_data.get("user_id")
         }
         return structured_obs

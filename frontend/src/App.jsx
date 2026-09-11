@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { WeatherProvider, useWeather } from './context/WeatherContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Auth from './screens/Auth';
 import Navbar from './components/Navbar';
 import Monsoon from './screens/Monsoon';
 import Dashboard from './screens/Dashboard';
@@ -33,7 +35,7 @@ function MainAppShell() {
 
   return (
     <div className="app-container">
-      {/* Top Navbar with Village Selector and Nav tabs */}
+      {/* Top Navbar with Village Selector, Nav tabs, and User Chip */}
       <Navbar activeScreen={activeScreen} setActiveScreen={setActiveScreen} />
 
       {/* Screen Views */}
@@ -87,10 +89,55 @@ function MainAppShell() {
   );
 }
 
+function AppRoot() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'var(--bg-primary)',
+          color: '#10b981',
+          gap: '16px',
+        }}
+      >
+        <div
+          style={{
+            width: '40px',
+            height: '40px',
+            border: '3px solid rgba(16, 185, 129, 0.2)',
+            borderTopColor: '#10b981',
+            borderRadius: '50%',
+            animation: 'spin 0.8s linear infinite',
+          }}
+        />
+        <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+          Loading GramWeather AI...
+        </div>
+      </div>
+    );
+  }
+
+  // If unauthenticated, display the Auth Screen before the app
+  if (!isAuthenticated) {
+    return <Auth />;
+  }
+
+  // Once authenticated, display the full GramWeather AI application
+  return <MainAppShell />;
+}
+
 export default function App() {
   return (
     <WeatherProvider>
-      <MainAppShell />
+      <AuthProvider>
+        <AppRoot />
+      </AuthProvider>
     </WeatherProvider>
   );
 }

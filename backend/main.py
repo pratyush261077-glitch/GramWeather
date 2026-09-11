@@ -17,7 +17,17 @@ from backend.database.database import (
 )
 from backend.database.schemas import (
     FarmerObservationCreate,
-    VerificationResult
+    VerificationResult,
+    UserSignupRequest,
+    UserLoginRequest,
+    AuthTokenResponse,
+    UserResponse
+)
+from backend.services.auth_service import (
+    seed_demo_accounts,
+    signup_user,
+    login_user,
+    get_user_from_token
 )
 from backend.services.weather_service import WeatherService
 from backend.services.forecast_service import ForecastService
@@ -121,7 +131,8 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     init_db()
-    print("[GramWeather AI] Database and backend services initialized.")
+    seed_demo_accounts()
+    print("[GramWeather AI] Database, demo accounts, and backend services initialized.")
 
 @app.get("/api/health")
 def health_check():
@@ -130,6 +141,73 @@ def health_check():
         "service": "GramWeather AI Backend",
         "mode": "Observe-Verify-Fuse-Predict-Explain-Learn"
     }
+
+# =========================================================================
+# Authentication Endpoints (Signup / Login / Me)
+# =========================================================================
+
+@app.post("/auth/signup", response_model=AuthTokenResponse)
+@app.post("/api/auth/signup", response_model=AuthTokenResponse)
+async def auth_signup(signup_data: UserSignupRequest):
+    """
+    Register a new farmer or officer account.
+    Validates unique phone / email, hashes password with bcrypt, and returns JWT token + user profile.
+    """
+    try:
+        user_record, token = signup_user(signup_data.dict())
+        return {
+            "token": token,
+            "token_type": "bearer",
+            "user": user_record
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Registration error: {str(e)}")
+
+@app.post("/auth/login", response_model=AuthTokenResponse)
+@app.post("/api/auth/login", response_model=AuthTokenResponse)
+async def auth_login(login_data: UserLoginRequest):
+    """
+    Authenticate user via phone or email + password.
+    Returns signed JWT access token (valid 7 days) and sanitized user profile.
+    """
+    try:
+        user_record, token = login_user(login_data.identifier, login_data.password)
+        return {
+            "token": token,
+            "token_type": "bearer",
+            "user": user_record
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Login error: {str(e)}")
+
+@app.get("/auth/me")
+@app.get("/api/auth/me")
+async def auth_me(request: Request):
+    """
+    Returns authenticated user profile decoded from Authorization: Bearer <token>.
+    """
+    auth_header = request.headers.get("authorization") or request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(
+            status_code=401,
+            detail="Missing or malformed Authorization header. Expected 'Bearer <token>'."
+        )
+    
+    token = auth_header.split(" ", 1)[1].strip()
+    try:
+        user_record = get_user_from_token(token)
+        # Return user with convenient shape
+        res = dict(user_record)
+        res["user"] = user_record
+        return res
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Authentication validation error: {str(e)}")
 
 @app.get("/api/villages")
 def get_villages():
@@ -228,6 +306,20 @@ async def submit_observation(request: Request):
             payload_dict = await request.json()
         except Exception:
             payload_dict = {}
+
+    # Attach authenticated user if Authorization Bearer token is provided
+    auth_header = request.headers.get("authorization") or request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header.split(" ", 1)[1].strip()
+        try:
+            current_user = get_user_from_token(token)
+            if current_user:
+                payload_dict["user_id"] = current_user.get("id")
+                # If reporter_name was default or empty, use authenticated user's name
+                if not payload_dict.get("reporter_name") or payload_dict.get("reporter_name") == "Local Farmer":
+                    payload_dict["reporter_name"] = current_user.get("name")
+        except Exception:
+            pass  # Fall back cleanly to anonymous if token invalid or expired
 
     res = ObservationService.submit_farmer_report(payload_dict)
     

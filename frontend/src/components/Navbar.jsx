@@ -1,6 +1,7 @@
 import React from 'react';
 import { useWeather } from '../context/WeatherContext';
-import { MapPin, Sprout, ShieldCheck, Compass, Send, RefreshCw, AlertTriangle, CloudRain } from './icons';
+import { useAuth } from '../context/AuthContext';
+import { MapPin, Sprout, ShieldCheck, Compass, Send, RefreshCw, AlertTriangle, CloudRain, LogOut } from './icons';
 import LanguageSelector from './LanguageSelector';
 import LocationChamberSelector from './LocationChamberSelector';
 
@@ -16,6 +17,7 @@ export default function Navbar({ activeScreen, setActiveScreen }) {
     t,
     getVillageLabel
   } = useWeather();
+  const { user, logout } = useAuth();
 
   return (
     <header className="navbar">
@@ -31,7 +33,7 @@ export default function Navbar({ activeScreen, setActiveScreen }) {
           </div>
         </div>
 
-        {/* Controls: 3 Chambers, Demo Scenario, Language, Report Weather, Refresh */}
+        {/* Controls: 3 Chambers, Demo Scenario, Language, Report Weather, Refresh, User Chip */}
         <div className="nav-controls">
           {/* 3-Chamber Location Selector (State -> Block -> Village) */}
           <LocationChamberSelector />
@@ -71,6 +73,96 @@ export default function Navbar({ activeScreen, setActiveScreen }) {
           >
             <RefreshCw size={13} />
           </button>
+
+          {/* User Chip + Logout Button */}
+          {user && (
+            <div
+              className="user-chip-wrapper"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '3px 8px 3px 10px',
+                background: 'rgba(0, 0, 0, 0.45)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                borderRadius: 'var(--radius-full)',
+                backdropFilter: 'blur(8px)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span
+                  style={{
+                    width: '7px',
+                    height: '7px',
+                    borderRadius: '50%',
+                    background: user.role === 'officer' ? '#38bdf8' : '#10b981',
+                    boxShadow: user.role === 'officer' ? '0 0 8px #38bdf8' : '0 0 8px #10b981',
+                    flexShrink: 0,
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    color: '#fff',
+                    maxWidth: '120px',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                  title={`${user.name} (${user.email || user.phone || ''})`}
+                >
+                  {user.name}
+                </span>
+                <span
+                  style={{
+                    fontSize: '0.62rem',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    background: user.role === 'officer' ? 'rgba(56, 189, 248, 0.2)' : 'rgba(16, 185, 129, 0.2)',
+                    color: user.role === 'officer' ? '#38bdf8' : '#34d399',
+                    border: `1px solid ${user.role === 'officer' ? 'rgba(56, 189, 248, 0.4)' : 'rgba(16, 185, 129, 0.4)'}`,
+                  }}
+                >
+                  {user.role === 'officer' ? 'Officer' : 'Farmer'}
+                </span>
+                <span
+                  style={{
+                    fontSize: '0.65rem',
+                    fontWeight: 700,
+                    color: 'var(--text-muted)',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  [{user.language || 'en'}]
+                </span>
+              </div>
+
+              <button
+                onClick={logout}
+                style={{
+                  background: 'rgba(239, 68, 68, 0.15)',
+                  border: '1px solid rgba(239, 68, 68, 0.35)',
+                  color: '#fca5a5',
+                  padding: '4px 8px',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  transition: 'all 0.15s ease',
+                }}
+                title="Log out of session"
+              >
+                <LogOut size={12} color="#f87171" />
+                <span>Logout</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
